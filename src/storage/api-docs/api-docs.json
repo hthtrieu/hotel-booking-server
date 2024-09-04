@@ -1,0 +1,261 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Swagger with Laravel",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/v1/auth/login": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Logs user into system",
+                "operationId": "643b1ef568bcd820eda5f8d045a56929",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "admin@admin.vn"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful operation"
+                    },
+                    "400": {
+                        "description": "Invalid username/password supplied"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/logout": {
+            "get": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "User logout",
+                "operationId": "01fe3b60aa3348f884acf73dc6b0e78c",
+                "responses": {
+                    "200": {
+                        "description": "User successfully logged out"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": [],
+                        "API_Key_Authorization": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/me": {
+            "get": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get user profiles",
+                "operationId": "537dcd1d54490af646d0379dad6570df",
+                "responses": {
+                    "200": {
+                        "description": "User profile retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": [],
+                        "API_Key_Authorization": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/register": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Register new user",
+                "operationId": "8cf252e767eb0c4ae9e5307f3fc7153a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@email.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "Viet Nam"
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "0123456789"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "userNo1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful operation"
+                    },
+                    "400": {
+                        "description": "Invalid username/password supplied"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/forgot-password": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "User request forgot password",
+                "operationId": "1567504e7f628da38521120715c56a06",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "admin@admin.vn"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful operation"
+                    },
+                    "400": {
+                        "description": "Invalid email supplied"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/reset-password": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "User request reset password",
+                "operationId": "6cede5531a660a7b685ea92300c441ee",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password",
+                                    "confirmPassword",
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "admin@admin.vn"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password"
+                                    },
+                                    "econfirmPasswordmail": {
+                                        "type": "string",
+                                        "example": "econfirmPasswordmail"
+                                    },
+                                    "otp": {
+                                        "type": "number",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful operation"
+                    },
+                    "400": {
+                        "description": "Invalid email supplied"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "auth",
+            "description": "auth"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "API_Key_Authorization": {
+                "type": "apiKey",
+                "description": "A short description for security scheme",
+                "name": "x-api-key",
+                "in": "header"
+            },
+            "bearerAuth": {
+                "type": "http",
+                "description": "A short description for security scheme",
+                "name": "Authorization",
+                "in": "header",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "security": [
+        {
+            "API_Key_Authorization": [],
+            "bearerAuth": []
+        }
+    ]
+}
