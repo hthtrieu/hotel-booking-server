@@ -4,8 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Reviews extends Model
+class Reviews extends BaseModel
 {
-    use HasFactory;
+    protected $fullable = [
+        'rating',
+        'comment',
+    ];
+
+    public function hotel(): BelongsTo
+    {
+        return $this->belongsTo(Hotels::class);
+    }
 }

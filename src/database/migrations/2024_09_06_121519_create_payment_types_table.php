@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('rooms', function (Blueprint $table) {
+        Schema::create('payment_types', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->string('name');
 
             $table->timestampTz('created_at')->nullable();
             $table->string('created_by', 100)->nullable();
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('rooms');
+        Schema::dropIfExists('payment_types');
     }
 };

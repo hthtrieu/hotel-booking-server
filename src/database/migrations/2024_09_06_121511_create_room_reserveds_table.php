@@ -11,8 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('rooms', function (Blueprint $table) {
+        Schema::create('room_reserveds', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('room_id')->nullable();
+            $table->foreign('room_id')->references('id')->on('rooms')->noActionOnDelete();
+            $table->uuid('reservation_id')->nullable();
+            $table->foreign('reservation_id')->references('id')->on('reservations')->noActionOnDelete();
+            $table->dateTime('start_day');
+            $table->dateTime('end_day');
 
             $table->timestampTz('created_at')->nullable();
             $table->string('created_by', 100)->nullable();
@@ -28,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('rooms');
+        Schema::dropIfExists('room_reserveds');
     }
 };
