@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('rooms', function (Blueprint $table) {
+        Schema::create('room_amenities', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('room_id')->nullable();
+            $table->foreign('room_id')->references('id')->on('room_types')->onDelete('cascade');
+            $table->uuid('amenity_id')->nullable();
+            $table->foreign('amenity_id')->references('id')->on('amenities')->onDelete('cascade');
 
             $table->timestampTz('created_at')->nullable();
             $table->string('created_by', 100)->nullable();
@@ -28,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('rooms');
+        Schema::dropIfExists('room_amenities');
     }
 };

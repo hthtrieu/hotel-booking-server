@@ -27,6 +27,28 @@ class UserSeeder extends Seeder
                 'created_at' => Carbon::now(config('app.timezone')),
                 'created_by' => 'seeder',
             ],
+            [
+                'id' => Str::uuid(),
+                'name' => 'host',
+                'email' => 'host@host.vn',
+                'password' => bcrypt('password'),
+                'role' => RoleEnum::HOST->value,
+                'address' => 'Vietnam',
+                'phone_number' => '0123456789',
+                'created_at' => Carbon::now(config('app.timezone')),
+                'created_by' => 'seeder',
+            ],
+            [
+                'id' => Str::uuid(),
+                'name' => 'user',
+                'email' => 'user@user.vn',
+                'password' => bcrypt('password'),
+                'role' => RoleEnum::USER->value,
+                'address' => 'Vietnam',
+                'phone_number' => '0123456789',
+                'created_at' => Carbon::now(config('app.timezone')),
+                'created_by' => 'seeder',
+            ],
         ]);
     }
 }

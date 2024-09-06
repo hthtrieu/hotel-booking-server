@@ -12,8 +12,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('room_types', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+            $table->uuid('id')->primary();
+            $table->string('name', 100);
+            $table->string('price', 50);
+            $table->integer('bathroom_count');
+            $table->float('room_area');
+            $table->tinyInteger('adult_count');
+            $table->tinyInteger('children_count');
+            $table->string('description', 255);
+            $table->uuid('hotel_id');
+            $table->foreign('hotel_id')->references('id')->on('hotels')->cascadeOnDelete();
+
+
+            $table->timestampTz('created_at')->nullable();
+            $table->string('created_by', 100)->nullable();
+            $table->timestampTz('updated_at')->nullable();
+            $table->string('updated_by', 100)->nullable();
+            $table->softDeletesTz();
+            $table->string('deleted_by', 100)->nullable();
         });
     }
 

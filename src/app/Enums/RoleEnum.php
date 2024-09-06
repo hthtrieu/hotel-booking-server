@@ -11,10 +11,8 @@ enum RoleEnum: int
 
     #[Label('Admin')]
     case ADMINISTRATOR = 0;
-    #[Label('HR')]
-    case HR = 1;
-    #[Label('Dev')]
-    case DEV = 2;
+    #[Label('HOST')]
+    case HOST = 1;
     #[Label('User')]
     case USER = 10;
 }
