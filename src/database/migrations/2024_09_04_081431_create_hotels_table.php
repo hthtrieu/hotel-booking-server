@@ -20,8 +20,8 @@ return new class extends Migration
             $table->enum('hotel_starts', [1, 2, 3, 4, 5, 6])->default(NULL);
             $table->string('phone_number', 20);
             $table->string('email', 50)->unique();
-            $table->time('check_in')->nullable();
-            $table->time('check_out')->nullable();
+            $table->time('check_in_time')->nullable();
+            $table->time('check_out_time')->nullable();
             $table->string('province');
             $table->string('district');
             $table->string('ward');

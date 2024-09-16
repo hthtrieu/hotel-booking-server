@@ -43,6 +43,14 @@ abstract class BaseRepository implements BaseRepositoryInterface
     private $orderDirection = 'asc';
 
     /**
+     * List of filterable fields
+     *
+     * @var array
+     */
+    protected $filterable = [];
+
+
+    /**
      * Return all items
      *
      * @param string $orderBy

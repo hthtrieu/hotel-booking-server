@@ -15,8 +15,8 @@ class Hotels extends BaseModel
         'hotel_starts',
         'phone_number',
         'email',
-        'check_in',
-        'check_out',
+        'check_in_time',
+        'check_out_time',
         'province',
         'district',
         'ward',
@@ -30,16 +30,21 @@ class Hotels extends BaseModel
 
     public function amenities(): BelongsToMany
     {
-        return $this->belongsToMany(Amenity::class);
+        return $this->belongsToMany(Amenity::class, 'hotel_amenities', 'hotel_id', 'amenity_id');
     }
 
     public function roomTypes(): HasMany
     {
-        return $this->hasMany(RoomTypes::class);
+        return $this->hasMany(RoomTypes::class, 'hotel_id');
     }
 
     public function reviews(): HasMany
     {
-        return $this->hasMany(Reviews::class);
+        return $this->hasMany(Reviews::class, 'hotel_id');
+    }
+
+    public function hoteAmenities(): HasMany
+    {
+        return $this->hasMany(Amenity::class, 'hotel_id');
     }
 }

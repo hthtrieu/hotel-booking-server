@@ -20,7 +20,12 @@ class RoomTypes extends BaseModel
 
     public function hotel(): BelongsTo
     {
-        return $this->belongsTo(Hotels::class);
+        return $this->belongsTo(Hotels::class, 'hotel_id');
+    }
+
+    public function roomReserveds()
+    {
+        return $this->hasMany(RoomReserved::class, 'room_id');
     }
 
     public function amenities(): BelongsToMany

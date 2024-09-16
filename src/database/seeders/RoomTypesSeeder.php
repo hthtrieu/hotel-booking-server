@@ -22,8 +22,8 @@ class RoomTypesSeeder extends Seeder
             $roomType1 = RoomTypes::create([
                 'id' => Str::uuid(),
                 'name' => 'Single ROOM',
-                'price' => '500.000',
-                'bathroom_count' => '1',
+                'price' => 500000.0,
+                'bathroom_count' => 1,
                 'room_area' => 5.5,
                 'adult_count' => 2,
                 'children_count' => 1,
@@ -34,8 +34,8 @@ class RoomTypesSeeder extends Seeder
             $roomType2 = RoomTypes::create([
                 'id' => Str::uuid(),
                 'name' => 'Queen ROOM',
-                'price' => '1.000.000',
-                'bathroom_count' => '1',
+                'price' => 1000000.0,
+                'bathroom_count' => 1,
                 'room_area' => 10,
                 'adult_count' => 2,
                 'children_count' => 1,
@@ -46,8 +46,8 @@ class RoomTypesSeeder extends Seeder
             $roomType3 = RoomTypes::create([
                 'id' => Str::uuid(),
                 'name' => 'Deluxe ROOM',
-                'price' => '2.000.000',
-                'bathroom_count' => '1',
+                'price' => 2000000.0,
+                'bathroom_count' => 1,
                 'room_area' => 8,
                 'adult_count' => 2,
                 'children_count' => 1,

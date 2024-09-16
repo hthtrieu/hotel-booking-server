@@ -15,6 +15,6 @@ class Reviews extends BaseModel
 
     public function hotel(): BelongsTo
     {
-        return $this->belongsTo(Hotels::class);
+        return $this->belongsTo(Hotels::class, 'hotel_id');
     }
 }

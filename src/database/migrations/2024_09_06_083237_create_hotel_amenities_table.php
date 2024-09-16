@@ -15,8 +15,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('hotel_id')->nullable();
             $table->foreign('hotel_id')->references('id')->on('hotels')->cascadeOnDelete();
-            $table->uuid('amentiy_id')->nullable();
-            $table->foreign('amentiy_id')->references('id')->on('amenities')->cascadeOnDelete();
+            $table->uuid('amenity_id')->nullable();
+            $table->foreign('amenity_id')->references('id')->on('amenities')->cascadeOnDelete();
             $table->double('price')->nullable();
 
             $table->timestampTz('created_at')->nullable();

@@ -19,4 +19,8 @@ class ApiCode
     public const SEND_FORGOT_PASSWORD_SUCCESS = 256;
 
     public const OUT_EXPIRE_TIME = 257;
+
+    public const MISSING_REQUEST_PARAMS = 258;
+
+    public const DATA_NOT_FOUND = 259;
 }

@@ -33,17 +33,17 @@ class HotelAmenitySeeder extends Seeder
                 [
                     'id' => Str::uuid(),
                     'hotel_id' => $hotel->id,
-                    'amentiy_id' => $hotelAmenities[0]->id
+                    'amenity_id' => $hotelAmenities[0]->id
                 ],
                 [
                     'id' => Str::uuid(),
                     'hotel_id' => $hotel->id,
-                    'amentiy_id' => $hotelAmenities[1]->id
+                    'amenity_id' => $hotelAmenities[1]->id
                 ],
                 [
                     'id' => Str::uuid(),
                     'hotel_id' => $hotel->id,
-                    'amentiy_id' => $hotelAmenities[2]->id
+                    'amenity_id' => $hotelAmenities[2]->id
                 ],
             ]);
         }

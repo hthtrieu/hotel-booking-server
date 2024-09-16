@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('room_types', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name', 100);
-            $table->string('price', 50);
-            $table->integer('bathroom_count');
+            $table->double('price');
+            $table->tinyInteger('bathroom_count');
             $table->float('room_area');
             $table->tinyInteger('adult_count');
             $table->tinyInteger('children_count');
