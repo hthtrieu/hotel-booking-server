@@ -2,4 +2,9 @@
 
 namespace App\Services\Reservation;
 
-interface IReservationService {}
+use App\Http\Requests\Reservation\CreateReservationRequest;
+
+interface IReservationService
+{
+    public function createNewReservation(CreateReservationRequest $request);
+}

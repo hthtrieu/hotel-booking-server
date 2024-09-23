@@ -29,6 +29,7 @@ class RoomTypesSeeder extends Seeder
                 'children_count' => 1,
                 'description' => 'description',
                 'hotel_id' => $hotel->id,
+                'room_count' => 3,
             ]);
 
             $roomType2 = RoomTypes::create([
@@ -41,6 +42,8 @@ class RoomTypesSeeder extends Seeder
                 'children_count' => 1,
                 'description' => 'description',
                 'hotel_id' => $hotel->id,
+                'room_count' => 2,
+
             ]);
 
             $roomType3 = RoomTypes::create([
@@ -53,6 +56,8 @@ class RoomTypesSeeder extends Seeder
                 'children_count' => 1,
                 'description' => 'description',
                 'hotel_id' => $hotel->id,
+                'room_count' => 1,
+
             ]);
             foreach ([$roomType1, $roomType2, $roomType3] as $roomType) {
                 foreach ($bedTypes as $bedType) {

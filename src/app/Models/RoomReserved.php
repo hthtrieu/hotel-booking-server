@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\RoomTypes;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RoomReserved extends BaseModel
 {
@@ -12,8 +14,8 @@ class RoomReserved extends BaseModel
         'start_day',
         'end_day',
     ];
-    public function room()
-    {
-        return $this->belongsTo(RoomTypes::class, 'room_id');
-    }
+    // public function reservations(): HasMany
+    // {
+    //     return $this->hasMany(Room::class, 'room_bed_types');
+    // }
 }

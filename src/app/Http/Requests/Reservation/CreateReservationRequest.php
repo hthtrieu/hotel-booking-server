@@ -11,7 +11,7 @@ class CreateReservationRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,18 +22,19 @@ class CreateReservationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'hotel_id' => 'validation.id',
+            'hotel_id' => config('validation.id'),
             'note' => ['string'], //optional
-            'name' => 'validation.string',
-            'email' => 'validation.email',
-            'phoneNumber' => 'validation.phone_number',
+            'name' => config('validation.string'),
+            'email' => config('validation.email'),
+            'phoneNumber' => config('validation.phone_number'),
             'paymentMethod' => ['string'], //!todo: check optional or not
-            'totalPrice' => 'validation.numeric',
+            'totalPrice' => config('validation.numeric'),
             'transDate' => 'string', //transaction date
-            'tax' => 'validation.numeric',
-            'vat' => 'validation.numeric', //total price after tax
-            'checkInDay' => '', //checkin day
-            'checkOutDay' => '', // checkout day
+            'tax' => config('validation.numeric'),
+            'vat' => config('validation.numeric'), //total price after tax
+            'checkInDay' => config('validation.string'), //checkin day
+            'checkOutDay' => config('validation.string'), // checkout day
+            'roomTypeReservedList' => ['array'],
         ];
     }
 }

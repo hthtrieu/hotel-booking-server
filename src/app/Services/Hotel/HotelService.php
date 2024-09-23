@@ -34,6 +34,7 @@ class HotelService implements IHotelService
             }
             //get hotel
         } catch (\Throwable $th) {
+            dd($th);
             return $this->respondWithError(apiCode::SOMETHING_WENT_WRONG, 404);
         }
     }

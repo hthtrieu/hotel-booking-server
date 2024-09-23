@@ -4,9 +4,18 @@ namespace App\Http\Controllers\Payment;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Traits\ResponseApi;
+use App\Services\Payment\IPaymentService;
+use App\Http\Requests\Payment\CreatePaymentRequest;
+use App\ApiCode;
+use App\Http\Requests\Reservation\CreateReservationRequest;
 
 class PaymentController extends Controller
 {
+    use ResponseApi;
+    public function __construct(
+        private readonly IPaymentService $paymentService,
+    ) {}
     /**
      * Display a listing of the resource.
      */
@@ -15,20 +24,45 @@ class PaymentController extends Controller
         //
     }
 
-    /**
-     * create new url for payment/order with vnpay
-     */
+
     public function create()
     {
         //
     }
 
     /**
-     * Store a newly created resource in storage.
+     * create new url for payment/order with vnpay
      */
-    public function store(Request $request)
+    /**
+     * @OA\Post(
+     *     path="/api/v1/payments",
+     *     tags={"payment"},
+     *     summary="Create payment request url for user's order",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"price"},
+     *             @OA\Property(property="price", type="numeric", example="500.000"),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="successful operation",
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid request params supplied"
+     *     )
+     * )
+     */
+    public function store(CreateReservationRequest $request)
     {
-        //
+        return $this->paymentService->createPaymentRequest($request);
+        // if ($urlDataArray) {
+        //     return $this->respond($urlDataArray, "Payment Request");
+        // } else {
+        //     return $this->respondWithError(ApiCode::DATA_NOT_FOUND, 404);
+        // }
     }
 
     /**

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->float('room_area');
             $table->tinyInteger('adult_count');
             $table->tinyInteger('children_count');
+            $table->integer('room_count');
             $table->string('description', 255);
             $table->uuid('hotel_id');
             $table->foreign('hotel_id')->references('id')->on('hotels')->cascadeOnDelete();

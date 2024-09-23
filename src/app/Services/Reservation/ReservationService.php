@@ -3,6 +3,9 @@
 namespace App\Services\Reservation;
 
 use App\ApiCode;
+use App\Dtos\Room\RoomAvailableOption;
+use App\Enums\ReservationStatusEnum;
+use App\Enums\RoleEnum;
 use App\Traits\ResponseApi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -10,6 +13,10 @@ use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Repositories\Hotel\IHotelRepo;
 use App\Helpers\CheckUUIDFormat;
+use App\Http\Requests\Reservation\CreateReservationRequest;
+use App\Repositories\Reservation\IReservationRepository;
+use App\Repositories\RoomType\IRoomTypeRepository;
+use App\Repositories\User\UserRepositoryInterface;
 
 class ReservationService implements IReservationService
 {
@@ -17,5 +24,59 @@ class ReservationService implements IReservationService
 
     public function __construct(
         private readonly IHotelRepo $hotelRepo,
+        private readonly IReservationRepository $reservationRepo,
+        private readonly UserRepositoryInterface $userRepo,
+        private readonly IRoomTypeRepository $roomTypeRepo,
     ) {}
+
+    public function createNewReservation(CreateReservationRequest $request)
+    {
+        $data = $request->validated();
+        $checkInDay = Carbon::parse($data['checkInDay']);
+        $checkOutDay = Carbon::parse($data['checkOutDay']);
+        //check user is existed
+        $userExisted = $this->userRepo->findBy('email', $data['email']);
+        if (!$userExisted) {
+            //if not -> save new user
+            $user = $this->userRepo->store([
+                'email' => $data['email'],
+                'phone_number' => $data['phoneNumber'],
+                'password' => '',
+                'role' => RoleEnum::USER->value,
+                'name' => $data['name'],
+            ]);
+        }
+
+        //check room in roomtypes list is valid on the order day
+        foreach ($data['roomTypeReservedList'] as $roomTypes) {
+            // dd($roomTypes['count']);
+            $availableRooms = $this->roomTypeRepo
+                ->getRoomAvailableForRoomTypes(new RoomAvailableOption(
+                    $roomTypes['id'],
+                    $roomTypes['count'],
+                    $checkInDay,
+                    $checkOutDay,
+                ));
+            if ($availableRooms->count() >= $roomTypes['count']) {
+            } else {
+                //need throw error message
+                return false;
+            }
+            // dd($availableRoom);
+        }
+
+
+        //insert new room_reserved
+        // insert new reservation
+        $newReservation = $this->reservationRepo->createNewReservation(
+            [
+                'email' => $data['email'],
+                'site_frees' => $data['site_frees'],
+                'tax_paid' => $data['tax_paid'],
+                'status' => ReservationStatusEnum::PENDING->value,
+                'total_price' => $data['total_price'],
+            ]
+        );
+        // $this->reservationRepo->createNewReservation($data);
+    }
 }

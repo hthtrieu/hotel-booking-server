@@ -23,4 +23,6 @@ class ApiCode
     public const MISSING_REQUEST_PARAMS = 258;
 
     public const DATA_NOT_FOUND = 259;
+
+    public const CREATE_FAILED = 260;
 }

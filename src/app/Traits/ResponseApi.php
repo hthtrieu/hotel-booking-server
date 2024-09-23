@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\ApiCode;
 use Illuminate\Http\Response;
 use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
 
@@ -26,7 +27,10 @@ trait ResponseApi
     {
         return ResponseBuilder::asError($apiCode)->withHttpCode($httpCode)->build();
     }
-
+    public function respondWithErrorMessage($msg, $apiCode = 250)
+    {
+        return ResponseBuilder::asError($apiCode)->withMessage($msg)->build();
+    }
     public function respondBadRequest($apiCode)
     {
         return $this->respondWithError($apiCode, Response::HTTP_BAD_REQUEST);

@@ -42,9 +42,4 @@ class Hotels extends BaseModel
     {
         return $this->hasMany(Reviews::class, 'hotel_id');
     }
-
-    public function hoteAmenities(): HasMany
-    {
-        return $this->hasMany(Amenity::class, 'hotel_id');
-    }
 }

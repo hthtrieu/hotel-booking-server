@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('rooms', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('room_types_id');
+            $table->foreign('room_types_id')->references('id')->on('room_types')->cascadeOnDelete();
 
             $table->timestampTz('created_at')->nullable();
             $table->string('created_by', 100)->nullable();

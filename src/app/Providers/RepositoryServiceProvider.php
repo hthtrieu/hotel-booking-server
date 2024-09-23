@@ -14,6 +14,16 @@ use App\Repositories\PasswordReset\PasswordResetRepositoryInterface;
 
 use App\Repositories\Hotel\IHotelRepo;
 use App\Repositories\Hotel\HotelRepo;
+
+use App\Repositories\Payment\IPaymentRepository;
+use App\Repositories\Payment\PaymentRepository;
+
+use App\Repositories\Reservation\IReservationRepository;
+use App\Repositories\Reservation\ReservationRepository;
+
+use App\Repositories\RoomType\IRoomTypeRepository;
+use App\Repositories\RoomType\RoomTypeRepository;
+
 //services
 use App\Services\Auth\AuthService;
 use App\Services\Auth\AuthServiceInterface;
@@ -27,6 +37,12 @@ use App\Services\Reservation\ReservationService;
 use App\Services\Room\IRoomService;
 use App\Services\Room\RoomService;
 
+use App\Services\Payment\IPaymentService;
+use App\Services\Payment\PaymentService;
+
+use App\Services\User\IUserService;
+use App\Services\User\UserService;
+
 class RepositoryServiceProvider extends ServiceProvider
 {
     /**
@@ -38,12 +54,17 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(PasswordResetRepositoryInterface::class, PasswordResetRepository::class);
         $this->app->bind(IHotelRepo::class, HotelRepo::class);
+        $this->app->bind(IPaymentRepository::class, PaymentRepository::class);
+        $this->app->bind(IReservationRepository::class, ReservationRepository::class);
+        $this->app->bind(IRoomTypeRepository::class, RoomTypeRepository::class);
 
         // Services
         $this->app->bind(AuthServiceInterface::class, AuthService::class);
         $this->app->bind(IHotelService::class, HotelService::class);
         $this->app->bind(IReservationService::class, ReservationService::class);
         $this->app->bind(IRoomService::class, RoomService::class);
+        $this->app->bind(IPaymentService::class, PaymentService::class);
+        $this->app->bind(IUserService::class, UserService::class);
     }
 
     /**
