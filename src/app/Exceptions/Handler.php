@@ -11,51 +11,30 @@ use Throwable;
 
 class Handler extends ExceptionHandler
 {
-    /**
-     * The list of the inputs that are never flashed to the session on validation exceptions.
-     *
-     * @var array<int, string>
-     */
     protected $dontFlash = [
         'current_password',
         'password',
         'password_confirmation',
     ];
 
-    /**
-     * Register the exception handling callbacks for the application.
-     */
     public function register(): void
     {
+        // Xử lý ngoại lệ JWT nếu có
         $this->renderable(function (Throwable $e, $request) {
             return (new JWTExceptionHandler($this->container))->render($request, $e);
         });
     }
 
-    /**
-     * Report or log an exception.
-     *
-     * @return void
-     *
-     * @throws \Exception
-     */
-    public function report(Throwable $exception)
-    {
-        parent::report($exception);
-    }
-
-    /**
-     * Render an exception into an HTTP response.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
-     *
-     * @throws \Throwable
-     */
     public function render($request, Throwable $exception)
     {
+        // Xử lý lỗi validation
         if ($exception instanceof ValidationException) {
             return $this->respondWithValidationError($exception);
+        }
+
+        // Xử lý lỗi DataNotFoundException
+        if ($exception instanceof DataNotFoundException) {
+            return $this->respondWithNotFound($exception);
         }
 
         return parent::render($request, $exception);
@@ -66,6 +45,14 @@ class Handler extends ExceptionHandler
         return ResponseBuilder::asError(ApiCode::VALIDATION_ERROR)
             ->withData($exception->errors())
             ->withHttpCode(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->build();
+    }
+
+    private function respondWithNotFound(DataNotFoundException $exception)
+    {
+        return ResponseBuilder::asError(ApiCode::DATA_NOT_FOUND)
+            ->withMessage($exception->getMessage())
+            ->withHttpCode(Response::HTTP_NOT_FOUND)
             ->build();
     }
 }
