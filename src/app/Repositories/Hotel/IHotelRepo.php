@@ -2,8 +2,9 @@
 
 namespace App\Repositories\Hotel;
 
+use App\Repositories\BaseRepositoryInterface;
 
-interface IHotelRepo
+interface IHotelRepo extends BaseRepositoryInterface
 {
     public function getHotelsList(array $query);
 

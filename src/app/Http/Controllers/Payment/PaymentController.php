@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Traits\ResponseApi;
 use App\Services\Payment\IPaymentService;
-use App\Http\Requests\Payment\CreatePaymentRequest;
 use App\ApiCode;
 use App\Http\Requests\Reservation\CreateReservationRequest;
 
@@ -95,5 +94,31 @@ class PaymentController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+    /**
+     * @OA\Post(
+     *     path="/api/v1/payments/success",
+     *     tags={"payment"},
+     *     summary="Send info for updating and create invoice if payment successfuly",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"price"},
+     *             @OA\Property(property="price", type="numeric", example="500.000"),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="successful operation",
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid request params supplied"
+     *     )
+     * )
+     */
+    public function paymentSuccess(Request $request)
+    {
+        return $this->respondWithMessage('okok');
     }
 }

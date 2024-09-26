@@ -7,6 +7,7 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Validation\ValidationException;
 use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
 use Symfony\Component\HttpFoundation\Response;
+use App\Exceptions\ResponseException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -36,6 +37,10 @@ class Handler extends ExceptionHandler
         if ($exception instanceof DataNotFoundException) {
             return $this->respondWithNotFound($exception);
         }
+        // Xử lý lỗi logic
+        if ($exception instanceof ResponseException) {
+            return $this->respondException($exception);
+        }
 
         return parent::render($request, $exception);
     }
@@ -51,6 +56,13 @@ class Handler extends ExceptionHandler
     private function respondWithNotFound(DataNotFoundException $exception)
     {
         return ResponseBuilder::asError(ApiCode::DATA_NOT_FOUND)
+            ->withMessage($exception->getMessage())
+            ->withHttpCode(Response::HTTP_NOT_FOUND)
+            ->build();
+    }
+    private function respondException(ResponseException $exception)
+    {
+        return ResponseBuilder::asError(ApiCode::SOMETHING_WENT_WRONG)
             ->withMessage($exception->getMessage())
             ->withHttpCode(Response::HTTP_NOT_FOUND)
             ->build();

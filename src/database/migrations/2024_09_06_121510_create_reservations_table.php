@@ -15,10 +15,9 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users')->noActionOnDelete();
-            // $table->uuid('amenity_id')->nullable();
-            // $table->foreign('amenity_id')->references('id')->on('amenities')->noActionOnDelete();
             $table->string('email');
-            $table->double('site_fees');
+            $table->string('reservation_code')->nullable();
+            $table->double('site_fees')->nullable();
             $table->double('tax_paid');
             $table->enum('status', ['CANCELLED', 'CONFIRMED', 'PENDING']);
             $table->double('total_price');

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Reservation;
+namespace App\Http\Requests\Payment;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserBookedRoomRequest extends FormRequest
+class PaymentSuccessRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

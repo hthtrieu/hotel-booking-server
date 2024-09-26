@@ -10,11 +10,14 @@ require __DIR__ . '/auth.php';
 
 
 Route::group([], function () {
-    // Route::group(['prefix' => 'hotels'], function () {
-    //     Route::get('', [HotelController::class, 'index']);
-    // });
     Route::resource('hotels', HotelController::class);
     Route::resource('reservations', ReservationController::class);
+    // Prefix for payments routes
+    Route::group(['prefix' => 'payments'], function () {
+        Route::post('/success', [PaymentController::class, 'paymentSuccess']);
+    });
+
+    // Separate resource route for payments (not inside the group with prefix)
     Route::resource('payments', PaymentController::class);
 });
 

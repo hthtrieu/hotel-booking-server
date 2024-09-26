@@ -15,11 +15,11 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('name', 255);
             $table->tinyInteger('role');
-            $table->rememberToken();
-            $table->string('address', 1000);
+            $table->rememberToken()->nullable();
+            $table->string('address', 1000)->nullable();
             $table->string('email', 255)->unique();
             $table->string('phone_number', 255);
-            $table->string('password', 255);
+            $table->string('password', 255)->nullable();
 
             $table->timestampTz('created_at')->nullable();
             $table->string('created_by', 100)->nullable();

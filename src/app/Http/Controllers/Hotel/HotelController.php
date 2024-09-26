@@ -141,12 +141,12 @@ class HotelController extends Controller
     {
         try {
             $results =  $this->hotelService->getHotelsList($request);
-            if ($results) {
-                // dd($results);
-                return $this->respond($results);
-            } else {
-                return $this->respondNoContent();
-            }
+            return $this->respond($results);
+            // if ($results) {
+            //     // dd($results);
+            // } else {
+            //     return $this->respondNoContent();
+            // }
         } catch (Throwable $th) {
             return $this->respondWithError(ApiCode::SOMETHING_WENT_WRONG, 404);
         }

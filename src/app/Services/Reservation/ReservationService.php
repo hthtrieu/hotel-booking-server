@@ -6,6 +6,7 @@ use App\ApiCode;
 use App\Dtos\Room\RoomAvailableOption;
 use App\Enums\ReservationStatusEnum;
 use App\Enums\RoleEnum;
+use App\Exceptions\ResponseException;
 use App\Traits\ResponseApi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -42,14 +43,16 @@ class ReservationService implements IReservationService
                 'email' => $data['email'],
                 'phone_number' => $data['phoneNumber'],
                 'password' => '',
+                'address' => '',
                 'role' => RoleEnum::USER->value,
                 'name' => $data['name'],
             ]);
+        } else {
+            $user = $userExisted;
         }
 
         //check room in roomtypes list is valid on the order day
         foreach ($data['roomTypeReservedList'] as $roomTypes) {
-            // dd($roomTypes['count']);
             $availableRooms = $this->roomTypeRepo
                 ->getRoomAvailableForRoomTypes(new RoomAvailableOption(
                     $roomTypes['id'],
@@ -57,26 +60,23 @@ class ReservationService implements IReservationService
                     $checkInDay,
                     $checkOutDay,
                 ));
-            if ($availableRooms->count() >= $roomTypes['count']) {
-            } else {
-                //need throw error message
-                return false;
+            if (!$availableRooms->count() || $availableRooms[0]['rooms']->count() < $roomTypes['count']) {
+                throw new ResponseException("Not enough rooms");
             }
+            return $this->reservationRepo->createNewReservation(
+                [
+                    'email' => $data['email'],
+                    'tax_paid' => $data['tax'],
+                    'status' => ReservationStatusEnum::PENDING->value,
+                    'total_price' => $data['totalPrice'],
+                    'user' => $user,
+                    'rooms' => $availableRooms[0]['rooms'],
+                    'start_day' => Carbon::parse($data['checkInDay']),
+                    'end_day' => Carbon::parse($data['checkOutDay']),
+                ]
+            );
+
             // dd($availableRoom);
         }
-
-
-        //insert new room_reserved
-        // insert new reservation
-        $newReservation = $this->reservationRepo->createNewReservation(
-            [
-                'email' => $data['email'],
-                'site_frees' => $data['site_frees'],
-                'tax_paid' => $data['tax_paid'],
-                'status' => ReservationStatusEnum::PENDING->value,
-                'total_price' => $data['total_price'],
-            ]
-        );
-        // $this->reservationRepo->createNewReservation($data);
     }
 }

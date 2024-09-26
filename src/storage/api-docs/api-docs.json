@@ -454,6 +454,42 @@
                     }
                 }
             }
+        },
+        "/api/v1/payments/success": {
+            "post": {
+                "tags": [
+                    "payment"
+                ],
+                "summary": "Send info for updating and create invoice if payment successfuly",
+                "operationId": "f9081f49ef9484f5e9614acc94ab7c17",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "price"
+                                ],
+                                "properties": {
+                                    "price": {
+                                        "type": "numeric",
+                                        "example": "500.000"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful operation"
+                    },
+                    "400": {
+                        "description": "Invalid request params supplied"
+                    }
+                }
+            }
         }
     },
     "tags": [

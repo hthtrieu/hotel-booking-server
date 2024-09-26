@@ -8,6 +8,7 @@ use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
@@ -93,5 +94,9 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
             'email' => '',
             'phone_number' => '',
         ];
+    }
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class, 'user_id');
     }
 }

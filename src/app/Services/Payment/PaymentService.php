@@ -2,9 +2,9 @@
 
 namespace App\Services\Payment;
 
+use App\Enums\ReservationStatusEnum;
 use App\Helpers\VnPayHelper;
 use App\Traits\ResponseApi;
-use App\Http\Requests\Payment\CreatePaymentRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use App\Repositories\Reservation\IReservationRepository;
@@ -125,14 +125,23 @@ class PaymentService implements IPaymentService
             'vnp_url' => $vnp_Url
         );
         //save reservation status is pending
-        $isCreatedReservation = $this->reservationService->createNewReservation(($request));
+        $reservation = $this->reservationService->createNewReservation(($request));
+        dd($reservation);
         if (isset($_POST['redirect'])) {
             header('Location: ' . $vnp_Url);
             die();
         }
-        if (!$isCreatedReservation) {
-            return $this->respondWithErrorMessage('Create reservation Failed');
-        }
         return $this->respond($returnData, "Payment Request");
+    }
+
+    public function paymentSuccess($request)
+    {
+        $reservationUpdated = $this->reservationRepo->find($request->reservation_id);
+        $reservationUpdated->reservation_code = $request->code;
+        $reservationUpdated->status = ReservationStatusEnum::CONFIRMED->value;
+        $this->reservationRepo->update($reservationUpdated->id, $reservationUpdated);
+        //!todo create invoice
+        //!todo send email invoice
+        return;
     }
 }
