@@ -22,16 +22,20 @@ class PaymentSuccessRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'hotel_id' => config('validation.id'),
-            'note' => ['string'], //optional
-            'name' => config('validation.string'),
-            'email' => config('validation.email'),
-            'phoneNumber' => config('validation.phone_number'),
-            'paymentMethod' => ['string'], //!todo: check optional or not
-            'totalPrice' => config('validation.numeric'),
-            // 'orderId' => 'validation.id',
-            'checkInDay' => 'required',
-            'checkOutDay' => 'required',
+            // 'hotel_id' => config('validation.id'),
+            // 'note' => ['string'], //optional
+            // 'name' => config('validation.string'),
+            // 'email' => config('validation.email'),
+            // 'phoneNumber' => config('validation.phone_number'),
+            // 'tax' => config('validation.numeric'),
+            // 'vat' => config('validation.numeric'), //total price after tax
+            // 'checkInDay' => config('validation.string'), //checkin day
+            // 'checkOutDay' => config('validation.string'), // checkout day
+            // 'roomTypeReservedList' => ['array'],
+            'reservation_code' => config('validation.string'),
+            'transaction_date' => config('validation.string'),
+            'payment_method' => config('validation.string'),
+            'order_id' => config('validation.string'),
         ];
     }
 }

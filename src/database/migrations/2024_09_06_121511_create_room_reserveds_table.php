@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('room_reserveds', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('room_id');
-            $table->foreign('room_id')->references('id')->on('rooms')->noActionOnDelete();
+            $table->foreign('room_id')->references('id')->on('rooms')->cascadeOnDelete();
             $table->uuid('reservation_id');
-            $table->foreign('reservation_id')->references('id')->on('reservations')->noActionOnDelete();
+            $table->foreign('reservation_id')->references('id')->on('reservations')->cascadeOnDelete();
             $table->dateTime('start_day');
             $table->dateTime('end_day');
 

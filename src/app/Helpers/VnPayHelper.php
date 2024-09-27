@@ -11,7 +11,7 @@ class VnPayHelper
     public static function generateOrderId(): string
     {
         $timeRequest = Carbon::now()->setTimezone('Asia/Ho_Chi_Minh')->format('YmdHis');
-        $orderId = $timeRequest + random_int(1, 1000);
+        $orderId = $timeRequest + random_int(1, 100);
         return $orderId;
     }
 

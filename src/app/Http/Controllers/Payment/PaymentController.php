@@ -119,6 +119,6 @@ class PaymentController extends Controller
      */
     public function paymentSuccess(Request $request)
     {
-        return $this->respondWithMessage('okok');
+        return $this->paymentService->paymentSuccess($request);
     }
 }

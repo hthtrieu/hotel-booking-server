@@ -15,7 +15,9 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Repositories\Hotel\IHotelRepo;
 use App\Helpers\CheckUUIDFormat;
 use App\Http\Requests\Reservation\CreateReservationRequest;
+use App\Models\Reservation;
 use App\Repositories\Reservation\IReservationRepository;
+use App\Repositories\Room\IRoomRepository;
 use App\Repositories\RoomType\IRoomTypeRepository;
 use App\Repositories\User\UserRepositoryInterface;
 
@@ -28,6 +30,7 @@ class ReservationService implements IReservationService
         private readonly IReservationRepository $reservationRepo,
         private readonly UserRepositoryInterface $userRepo,
         private readonly IRoomTypeRepository $roomTypeRepo,
+        private readonly IRoomRepository $roomRepo,
     ) {}
 
     public function createNewReservation(CreateReservationRequest $request)
@@ -44,7 +47,7 @@ class ReservationService implements IReservationService
                 'phone_number' => $data['phoneNumber'],
                 'password' => '',
                 'address' => '',
-                'role' => RoleEnum::USER->value,
+                'role' => RoleEnum::USER_NOT_REGISTER->value,
                 'name' => $data['name'],
             ]);
         } else {
@@ -60,7 +63,11 @@ class ReservationService implements IReservationService
                     $checkInDay,
                     $checkOutDay,
                 ));
-            if (!$availableRooms->count() || $availableRooms[0]['rooms']->count() < $roomTypes['count']) {
+            // dd($availableRooms);
+            if (!$availableRooms->count()) {
+                throw new ResponseException("Room types not found");
+            }
+            if ($availableRooms[0]['rooms']->count() < $roomTypes['count']) {
                 throw new ResponseException("Not enough rooms");
             }
             return $this->reservationRepo->createNewReservation(
@@ -75,8 +82,28 @@ class ReservationService implements IReservationService
                     'end_day' => Carbon::parse($data['checkOutDay']),
                 ]
             );
-
             // dd($availableRoom);
         }
+    }
+
+    public function getReservationByCode(string $code)
+    {
+        $reservation = $this->reservationRepo->findBy('reservation_code', $code, ['rooms']);
+        return $reservation;
+    }
+
+    public function getReservationDetails(string $reservationId = '', Reservation $reservation = null)
+    {
+        if ($reservationId) {
+            $reservationFounded = $this->reservationRepo->find($reservationId, relations: ['rooms']);
+        } else if ($reservation) {
+            $reservationFounded = $this->reservationRepo->find($reservation->id, relations: ['rooms']);
+        }
+        dd($reservationFounded['rooms']->count());
+
+        //get hotel
+        //get roomtypes list
+        //get reservation
+        //get user
     }
 }

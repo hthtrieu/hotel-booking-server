@@ -15,14 +15,16 @@ return new class extends Migration
             $table->uuid('id')->primary();
 
             $table->uuid('user_id')->nullable();
-            $table->foreign('user_id')->references('id')->on('users')->noActionOnDelete();
-            $table->uuid('reservation_id')->nullable();
-            $table->foreign('reservation_id')->references('id')->on('reservations')->noActionOnDelete();
-            $table->uuid('payment_types_id')->default(NULL);
-            $table->foreign('payment_types_id')->references('id')->on('payment_types')->noActionOnDelete();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('SET NULl');
 
-            $table->double('invoice_amount');
-            $table->double('refund_amount');
+            $table->uuid('reservation_id')->nullable();
+            $table->foreign('reservation_id')->references('id')->on('reservations')->onDelete('SET NULl');
+
+            $table->uuid('payment_types_id')->nullable();
+            $table->foreign('payment_types_id')->references('id')->on('payment_types')->onDelete('SET NULl');
+            $table->string('order_id'); //vnp_TxnRef
+            $table->double('invoice_amount')->default(NULL)->nullable();
+            $table->double('refund_amount')->default(NULL)->nullable();
             $table->dateTime('time_canceled')->nullable()->default(NULL);
             $table->dateTime('time_created')->nullable()->default(NULL);
             $table->dateTime('time_paid')->nullable()->default(NULL);

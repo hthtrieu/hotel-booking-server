@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Models\Reservation;
 use Illuminate\Support\ServiceProvider;
 
 //repositories
@@ -23,6 +22,12 @@ use App\Repositories\Reservation\ReservationRepository;
 
 use App\Repositories\RoomType\IRoomTypeRepository;
 use App\Repositories\RoomType\RoomTypeRepository;
+
+use App\Repositories\Room\IRoomRepository;
+use App\Repositories\Room\RoomRepository;
+
+use App\Repositories\Invoice\IInvoiceRepository;
+use App\Repositories\Invoice\InvoiceRepository;
 
 //services
 use App\Services\Auth\AuthService;
@@ -57,6 +62,8 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(IPaymentRepository::class, PaymentRepository::class);
         $this->app->bind(IReservationRepository::class, ReservationRepository::class);
         $this->app->bind(IRoomTypeRepository::class, RoomTypeRepository::class);
+        $this->app->bind(IRoomRepository::class, RoomRepository::class);
+        $this->app->bind(IInvoiceRepository::class, InvoiceRepository::class);
 
         // Services
         $this->app->bind(AuthServiceInterface::class, AuthService::class);

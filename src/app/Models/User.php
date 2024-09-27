@@ -95,8 +95,14 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
             'phone_number' => '',
         ];
     }
+
     public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class, 'user_id');
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'user_id');
     }
 }

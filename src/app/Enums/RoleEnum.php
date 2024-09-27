@@ -15,4 +15,6 @@ enum RoleEnum: int
     case HOST = 1;
     #[Label('User')]
     case USER = 10;
+    #[Label('User Not Register')]
+    case USER_NOT_REGISTER = 11;
 }
