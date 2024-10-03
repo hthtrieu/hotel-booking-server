@@ -22,8 +22,8 @@ return new class extends Migration
             $table->double('tax_paid');
             $table->enum('status', ['CANCELLED', 'CONFIRMED', 'PENDING']);
             $table->double('total_price');
-            $table->dateTime('expire_time')->nullable()
-                ->default(Carbon::now()->setTimezone('Asia/Ho_Chi_Minh')->addMinutes(10)->format('YmdHis')); //time for payment = 10 min
+            $table->dateTime('expire_time')->nullable();
+                // ->default(Carbon::now()->setTimezone('Asia/Ho_Chi_Minh')->addMinutes(10)->format('YmdHis')); //time for payment = 10 min
 
             $table->timestampTz('created_at')->nullable();
             $table->string('created_by', 100)->nullable();

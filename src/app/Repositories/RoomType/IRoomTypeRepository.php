@@ -8,5 +8,6 @@ use App\Repositories\BaseRepositoryInterface;
 interface IRoomTypeRepository extends BaseRepositoryInterface
 {
 
+    //! do not use this function
     public function getRoomAvailableForRoomTypes(RoomAvailableOption $data);
 }

@@ -20,6 +20,8 @@ use App\Repositories\Reservation\IReservationRepository;
 use App\Repositories\Room\IRoomRepository;
 use App\Repositories\RoomType\IRoomTypeRepository;
 use App\Repositories\User\UserRepositoryInterface;
+use PDO;
+use tidy;
 
 class ReservationService implements IReservationService
 {
@@ -56,20 +58,24 @@ class ReservationService implements IReservationService
 
         //check room in roomtypes list is valid on the order day
         foreach ($data['roomTypeReservedList'] as $roomTypes) {
-            $availableRooms = $this->roomTypeRepo
-                ->getRoomAvailableForRoomTypes(new RoomAvailableOption(
-                    $roomTypes['id'],
-                    $roomTypes['count'],
-                    $checkInDay,
-                    $checkOutDay,
-                ));
+            //get all room in pending reservation and check expire time
+            // $availableRooms = $this->roomTypeRepo
+            //     ->getRoomAvailableForRoomTypes(new RoomAvailableOption(
+            //         $roomTypes['id'],
+            //         $roomTypes['count'],
+            //         $checkInDay,
+            //         $checkOutDay,
+            //     ));
+            $availableRooms = $this->roomRepo->getRoomAvaiable($roomTypes['id'], $checkInDay, $checkOutDay, $roomTypes['count']);
+            // // dd($availableRooms);
+            // if (!$availableRooms->count()) {
+            //     throw new ResponseException("Room types not found");
+            // }
             // dd($availableRooms);
-            if (!$availableRooms->count()) {
-                throw new ResponseException("Room types not found");
-            }
-            if ($availableRooms[0]['rooms']->count() < $roomTypes['count']) {
+            if ($availableRooms->count() < $roomTypes['count']) {
                 throw new ResponseException("Not enough rooms");
             }
+            // dd($availableRooms);
             return $this->reservationRepo->createNewReservation(
                 [
                     'email' => $data['email'],
@@ -77,7 +83,7 @@ class ReservationService implements IReservationService
                     'status' => ReservationStatusEnum::PENDING->value,
                     'total_price' => $data['totalPrice'],
                     'user' => $user,
-                    'rooms' => $availableRooms[0]['rooms'],
+                    'rooms' => $availableRooms,
                     'start_day' => Carbon::parse($data['checkInDay']),
                     'end_day' => Carbon::parse($data['checkOutDay']),
                 ]

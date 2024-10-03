@@ -6,12 +6,14 @@ use App\Models\Hotels;
 use App\Repositories\Hotel\HotelRepo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Faker\Factory as Faker;
 
 class HotelTest extends TestCase
 {
     use RefreshDatabase;
 
     protected $hotelRepo;
+    protected $faker;
 
     protected function setUp(): void
     {
@@ -19,7 +21,8 @@ class HotelTest extends TestCase
 
         // Seed dữ liệu cho database
         $this->seed();
-
+        //tao faker
+        $this->faker = Faker::create();
         // Khởi tạo đối tượng HotelRepo
         $this->hotelRepo = new HotelRepo();
     }
@@ -34,6 +37,12 @@ class HotelTest extends TestCase
             'checkout' => '2024-09-12',
             'adult' => 2,
             'children' => 0,
+            'hotel_starts' => 3,
+            'min_price' => 0,
+            'max_price' => 0,
+            'review' => 3,
+            'page_index' => 1,
+            'page_size' => 6,
         ];
 
         // Gọi phương thức cần test với dữ liệu thật
@@ -41,8 +50,7 @@ class HotelTest extends TestCase
 
         // Kiểm tra kết quả trả về (Assertions)
         $this->assertIsArray($result);
-        $this->assertNotEmpty($result); // Đảm bảo có kết quả trả về từ database
-        // // Kiểm tra các phần tử trong mảng có phải là đối tượng Hotels không
+        $this->assertNotEmpty($result);
         foreach ($result as $hotel) {
             $this->assertInstanceOf(Hotels::class, $hotel['hotel']);
         }
