@@ -7,5 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ObjectImages extends BaseModel
 {
-    use HasFactory;
+    protected $fillable = [
+        'path',
+        'object_id',
+    ];
 }

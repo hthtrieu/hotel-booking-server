@@ -29,6 +29,9 @@ use App\Repositories\Room\RoomRepository;
 use App\Repositories\Invoice\IInvoiceRepository;
 use App\Repositories\Invoice\InvoiceRepository;
 
+use App\Repositories\Image\ImageRepositoryInterface;
+use App\Repositories\Image\ImageRepository;
+
 //services
 use App\Services\Auth\AuthService;
 use App\Services\Auth\AuthServiceInterface;
@@ -48,6 +51,9 @@ use App\Services\Payment\PaymentService;
 use App\Services\User\IUserService;
 use App\Services\User\UserService;
 
+use App\Services\Images\ImageServiceInterface;
+use App\Services\Images\ImageService;
+
 class RepositoryServiceProvider extends ServiceProvider
 {
     /**
@@ -64,6 +70,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(IRoomTypeRepository::class, RoomTypeRepository::class);
         $this->app->bind(IRoomRepository::class, RoomRepository::class);
         $this->app->bind(IInvoiceRepository::class, InvoiceRepository::class);
+        $this->app->bind(ImageRepositoryInterface::class, ImageRepository::class);
 
         // Services
         $this->app->bind(AuthServiceInterface::class, AuthService::class);
@@ -72,6 +79,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(IRoomService::class, RoomService::class);
         $this->app->bind(IPaymentService::class, PaymentService::class);
         $this->app->bind(IUserService::class, UserService::class);
+        $this->app->bind(ImageServiceInterface::class, ImageService::class);
     }
 
     /**

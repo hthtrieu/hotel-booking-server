@@ -66,7 +66,7 @@ class HotelRepo extends BaseRepository implements IHotelRepo
 
                 // Tìm giá phòng nhỏ nhất trong danh sách phòng phù hợp
                 $minPrice = $rooms->min('price');
-
+                // dd($rooms[0]->price);
                 // Chỉ thêm khách sạn vào kết quả nếu có phòng phù hợp
                 if ($rooms->isNotEmpty()) {
                     $result[] = [
@@ -124,7 +124,7 @@ class HotelRepo extends BaseRepository implements IHotelRepo
         }
 
         // Lấy kết quả
-        return $query->select('rooms.*')->get();
+        return $query->select(['rooms.*', 'room_types.*'])->get();
     }
 
 

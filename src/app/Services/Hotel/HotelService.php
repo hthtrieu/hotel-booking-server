@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Repositories\Hotel\IHotelRepo;
 use App\Helpers\CheckUUIDFormat;
+use App\Services\Images\ImageServiceInterface;
 
 class HotelService implements IHotelService
 {
@@ -18,6 +19,7 @@ class HotelService implements IHotelService
 
     public function __construct(
         private readonly IHotelRepo $hotelRepo,
+        private readonly ImageServiceInterface $imageService,
     ) {}
 
     public function getHotelsList(HotelSearchRequest $request)
@@ -27,12 +29,16 @@ class HotelService implements IHotelService
             if (empty($query['checkin']) || empty($query['checkout']) || empty($query['province'])) {
                 return $this->respondBadRequest(apiCode::MISSING_REQUEST_PARAMS);
             } else {
-                // if ($query['checkin'] < Carbon::now('+7')->format('Y-m-d')) {
-                // }
-                $roomMatched =  $this->hotelRepo->getHotelsList($query);
-                return $roomMatched;
+                $hotelMatched =  $this->hotelRepo->getHotelsList($query);
+                foreach ($hotelMatched as $hotel) {
+                    //get images
+                    if ($hotel['hotel']->id) {
+                        $images = $this->imageService->getHotelImages($hotel['hotel']->id);
+                        $hotel['hotel']->images = $images;
+                    }
+                }
+                return $hotelMatched;
             }
-            //get hotel
         } catch (\Throwable $th) {
             dd($th);
             return $this->respondWithError(apiCode::SOMETHING_WENT_WRONG, 404);

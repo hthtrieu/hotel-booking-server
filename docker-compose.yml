@@ -2,6 +2,8 @@ version: "3.8"
 networks:
   app-network:
     driver: bridge
+volumes:
+  minio-data:  # Define the 'minio-data' volume
 services:
   webserver:
     image: "nginx"
@@ -23,11 +25,6 @@ services:
     restart: unless-stopped
     ports:
       - "3308:3306"
-    # environment:
-    #   MYSQL_ROOT_PASSWORD: password
-    #   MYSQL_DATABASE: "mysql_${APP_NAME}"
-    #   MYSQL_USER: dev
-    #   MYSQL_PASSWORD: password
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: "mysql_${APP_NAME}"
@@ -35,11 +32,32 @@ services:
       - ./docker/mysql:/var/lib/mysql
     networks:
       - app-network
+  # redis:
+  #   image: redis:latest
+  #   container_name: redis_${APP_NAME}
+  #   restart: unless-stopped
+  #   networks:
+  #     - app-network
+
+  minio:
+    image: bitnami/minio:latest
+    container_name: minio_${APP_NAME}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - app-network
+    environment:
+      MINIO_ROOT_USER: user
+      MINIO_ROOT_PASSWORD: password
+    volumes:
+      - minio-data:/data  # Volume for Minio data
+
   phpmyadmin:
     image: phpmyadmin:latest
     container_name: phpmyadmin_${APP_NAME}
     ports:
-      - 9001:80
+      - 8080:80
     environment:
       - PMA_ARBITRARY=1
     networks:
@@ -54,8 +72,8 @@ services:
       - ./src:/var/www/html
     networks:
       - app-network
-    ports:
-      - "9000:9000"
+    # ports:
+    #   - "9000:9000"
   composer:
     image: "composer:latest"
     container_name: composer_${APP_NAME}

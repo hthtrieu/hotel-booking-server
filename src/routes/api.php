@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Hotel\HotelController;
 use App\Http\Controllers\Reservation\ReservationController;
 use App\Http\Controllers\Payment\PaymentController;
+use App\Http\Controllers\Upload\UploadController;
 
 require __DIR__ . '/auth.php';
 
@@ -16,9 +17,10 @@ Route::group([], function () {
     Route::group(['prefix' => 'payments'], function () {
         Route::post('/success', [PaymentController::class, 'paymentSuccess']);
     });
-
     // Separate resource route for payments (not inside the group with prefix)
     Route::resource('payments', PaymentController::class);
+
+    Route::resource('uploads', UploadController::class);
 });
 
 // Route::group(['middleware' => ['jwt.auth', 'jwt.auth:' . RoleEnum::ADMINISTRATOR->value]], function () {
