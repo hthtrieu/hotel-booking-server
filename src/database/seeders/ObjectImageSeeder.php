@@ -38,7 +38,6 @@ class ObjectImageSeeder extends Seeder
 
                 // Upload file
                 $path = $this->uploadFile($file, 'images');  // Lưu tệp vào thư mục 'images'
-
                 // Thêm bản ghi vào bảng ObjectImages
                 ObjectImages::insert([
                     [

@@ -7,50 +7,20 @@ use App\Traits\FileUploader;
 use App\Traits\ResponseApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Aws\S3\S3Client; // Import S3Client
 
 class UploadController extends Controller
 {
     use FileUploader, ResponseApi;
-    /**
-     * Display a listing of the resource.
-     */
 
-    // public function getPreSigned(Request $request)
-    // {
-    //     $client = Storage::disk('s3')->getDriver()->getAdapter()->getClient();
-    //     $fileName = Str::random(10) . '_' . $request->file_name;
-    //     $filePath = config('define.upload_path_zip_file') . '/' . $fileName;
-
-    //     $command = $client->getCommand('PutObject', [
-    //         'Bucket' => config('filesystems.disks.s3.bucket'),
-    //         'Key' => $filePath,
-    //     ]);
-
-    //     $request = $client->createPresignedRequest($command, '+20 minutes');
-
-    //     return [
-    //         'file_path' => $filePath,
-    //         'pre_signed' => (string) $request->getUri(),
-    //     ];
-    // }
-
-    public function index()
+    public function getPresignedURL(Request $request)
     {
-        //
-
+        $fileName = $request->file_name;
+        $result = $this->genPresignedURL($fileName);
+        return $result;
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         try {
@@ -67,35 +37,12 @@ class UploadController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function getImageURL(Request $request)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $path = $request->file_name; //example: hotel'images path
+        $url = $this->getURL($path);
+        return $this->respond([
+            'url' => $url,
+        ]);
     }
 }

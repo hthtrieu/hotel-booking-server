@@ -20,7 +20,11 @@ Route::group([], function () {
     // Separate resource route for payments (not inside the group with prefix)
     Route::resource('payments', PaymentController::class);
 
-    Route::resource('uploads', UploadController::class);
+    Route::group(['prefix' => 'uploads'], function () {
+        Route::post('/get-presigned-url', [UploadController::class, 'getPresignedURL']);
+        Route::post('/test-get-url', [UploadController::class, 'getImageURL']);
+        Route::post('/test-upload', [UploadController::class, 'store']);
+    });
 });
 
 // Route::group(['middleware' => ['jwt.auth', 'jwt.auth:' . RoleEnum::ADMINISTRATOR->value]], function () {
