@@ -34,4 +34,8 @@ class RoomTypeRepository extends BaseRepository implements IRoomTypeRepository
             })
             ->get();
     }
+    public function getRoomAmenities(string $id)
+    {
+        return $this->find($id, relations: ['amenities']);
+    }
 }

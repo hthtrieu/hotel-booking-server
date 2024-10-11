@@ -17,7 +17,7 @@ return new class extends Migration
             $table->uuid('owner_id')->nullable(); // Cho phép nullable trước khi đặt foreign key
             $table->foreign('owner_id')->references('id')->on('users')->onDelete('set null');
             $table->string('description', 255)->nullable();
-            $table->enum('hotel_starts', [1, 2, 3, 4, 5, 6])->default(NULL);
+            $table->enum('hotel_star', [1, 2, 3, 4, 5, 6])->default(NULL);
             $table->string('phone_number', 20);
             $table->string('email', 50)->unique();
             $table->time('check_in_time')->nullable();

@@ -14,16 +14,20 @@ class HotelRepo extends BaseRepository implements IHotelRepo
 
     public function getHotelsList(array $filters)
     {
+        // Bắt đầu query với model Hotels và các mối quan hệ
         $query = Hotels::with(['reviews', 'roomTypes', 'amenities']);
 
+        // Lọc theo tỉnh/thành phố
         if (!empty($filters['province'])) {
             $query->where('province', 'LIKE', '%' . $filters['province'] . '%');
         }
 
-        if (!empty($filters['hotel_starts']) && is_int(intval($filters['hotel_starts']))) {
-            $query->where('hotel_starts', '=', $filters['hotel_starts']);
+        // Lọc theo số sao của khách sạn
+        if (!empty($filters['hotel_star']) && is_int(intval($filters['hotel_star']))) {
+            $query->where('hotel_star', '>=',intval($filters['hotel_star']));
         }
 
+        // Lọc theo đánh giá trung bình
         if (!empty($filters['review']) && is_float(floatval($filters['review']))) {
             $query->whereHas('reviews', function ($q) use ($filters) {
                 $q->select('hotel_id', DB::raw('AVG(rating) as avg_rating'))
@@ -32,10 +36,10 @@ class HotelRepo extends BaseRepository implements IHotelRepo
             });
         }
 
-        // Thêm kiểm tra số lượng phòng chưa được đặt
+        // Lọc theo số lượng phòng
         if (!empty($filters['rooms']) && is_int(intval($filters['rooms']))) {
             $query->whereHas('roomTypes', function ($q) use ($filters) {
-                $q->select('hotel_id', DB::raw('room_types.id as room_type_id'), 'room_types.room_count') // Lấy thêm room_count
+                $q->select('hotel_id', DB::raw('room_types.id as room_type_id'), 'room_types.room_count')
                     ->join('rooms', 'room_types.id', '=', 'rooms.room_types_id')
                     ->leftJoin('room_reserveds', function ($join) use ($filters) {
                         $join->on('rooms.id', '=', 'room_reserveds.room_id')
@@ -49,87 +53,96 @@ class HotelRepo extends BaseRepository implements IHotelRepo
                             });
                     })
                     ->groupBy('room_types.id')
-                    ->havingRaw('COUNT(room_reserveds.id) <= room_types.room_count - ?', [intval($filters['rooms'])]); // Kiểm tra số lượng phòng chưa được đặt
+                    ->havingRaw('COUNT(room_reserveds.id) <= room_types.room_count - ?', [intval($filters['rooms'])]);
             });
         }
 
-        $hotels = $query->get();
-
-        $result = [];
-        if ($hotels) {
-            foreach ($hotels as $hotel) {
-                // Tính điểm trung bình reviews cho mỗi khách sạn
-                $averageRating = $hotel->reviews->avg('rating');
-
-                // Lấy danh sách phòng phù hợp với các bộ lọc
-                $rooms = $this->getRoomsForHotel($hotel, $filters);
-
-                // Tìm giá phòng nhỏ nhất trong danh sách phòng phù hợp
-                $minPrice = $rooms->min('price');
-                // dd($rooms[0]->price);
-                // Chỉ thêm khách sạn vào kết quả nếu có phòng phù hợp
-                if ($rooms->isNotEmpty()) {
-                    $result[] = [
-                        'hotel' => $hotel,
-                        'average_rating' => $averageRating,
-                        'min_price' => $minPrice,
-                        // 'rooms' => $rooms, // Nếu cần trả về danh sách phòng, bỏ comment dòng này
-                    ];
-                }
-            }
-        }
-
-        return $result;
-    }
-
-    private function getRoomsForHotel($hotel, array $filters)
-    {
-        $query = DB::table('rooms')
-            ->join('room_types', 'rooms.room_types_id', '=', 'room_types.id')
-            ->where('room_types.hotel_id', $hotel->id);
-
-        // Lọc theo số người lớn và trẻ em
+        // Lọc theo số lượng người lớn
         if (!empty($filters['adult'])) {
-            $query->where('room_types.adult_count', '>=', $filters['adult']);
+            $query->whereHas('roomTypes', function ($q) use ($filters) {
+                $q->where('adult_count', '>=', $filters['adult']);
+            });
         }
 
+        // Lọc theo số lượng trẻ em
         if (!empty($filters['children'])) {
-            $query->where('room_types.children_count', '>=', $filters['children']);
+            $query->whereHas('roomTypes', function ($q) use ($filters) {
+                $q->where('children_count', '>=', $filters['children']);
+            });
         }
 
         // Lọc theo giá (min_price và max_price)
         if (!empty($filters['min_price']) && is_double(doubleval($filters['min_price']))) {
-            $query->where('room_types.price', '>=', doubleval($filters['min_price']));
-        }
-
-        if (!empty($filters['max_price']) && is_double(doubleval($filters['max_price']))) {
-            $query->where('room_types.price', '<=', doubleval($filters['max_price']));
-        }
-
-        // Lọc theo ngày checkin và checkout
-        if (!empty($filters['checkin']) && !empty($filters['checkout'])) {
-            $query->whereNotExists(function ($q) use ($filters) {
-                $q->select(DB::raw(1))
-                    ->from('room_reserveds')
-                    ->whereRaw('room_reserveds.room_id = rooms.id')
-                    ->where(function ($q) use ($filters) {
-                        $q->whereBetween('room_reserveds.start_day', [$filters['checkin'], $filters['checkout']])
-                            ->orWhereBetween('room_reserveds.end_day', [$filters['checkin'], $filters['checkout']])
-                            ->orWhere(function ($q) use ($filters) {
-                                $q->where('room_reserveds.start_day', '<=', $filters['checkin'])
-                                    ->where('room_reserveds.end_day', '>=', $filters['checkout']);
-                            });
-                    });
+            $query->whereHas('roomTypes', function ($q) use ($filters) {
+                $q->where('price', '>=', doubleval($filters['min_price']));
             });
         }
 
-        // Lấy kết quả
-        return $query->select(['rooms.*', 'room_types.*'])->get();
+        if (!empty($filters['max_price']) && is_double(doubleval($filters['max_price']))) {
+            $query->whereHas('roomTypes', function ($q) use ($filters) {
+                $q->where('price', '<=', doubleval($filters['max_price']));
+            });
+        }
+
+        // Phân trang
+        $perPage = $filters['page_size'] ?? 6; // Số lượng kết quả mỗi trang (mặc định là 10)
+        $pageIndex  = $filters['page_index'] ?? 1;
+
+        // Sử dụng paginate để phân trang
+        $hotels = $query->paginate($perPage, ['*'], 'page', $pageIndex);
+
+        // Trả về kết quả phân trang cùng với các tham số filters
+        return $hotels->appends($filters);
     }
 
+    // // Hàm lấy phòng cho khách sạn với bộ lọc được giữ nguyên
+    // private function getRoomsForHotel($hotel, array $filters)
+    // {
+    //     $query = DB::table('rooms')
+    //         ->join('room_types', 'rooms.room_types_id', '=', 'room_types.id')
+    //         ->where('room_types.hotel_id', $hotel->id);
+
+    //     // Lọc theo số người lớn và trẻ em
+    //     if (!empty($filters['adult'])) {
+    //         $query->where('room_types.adult_count', '>=', $filters['adult']);
+    //     }
+
+    //     if (!empty($filters['children'])) {
+    //         $query->where('room_types.children_count', '>=', $filters['children']);
+    //     }
+
+    //     // Lọc theo giá (min_price và max_price)
+    //     if (!empty($filters['min_price']) && is_double(doubleval($filters['min_price']))) {
+    //         $query->where('room_types.price', '>=', doubleval($filters['min_price']));
+    //     }
+
+    //     if (!empty($filters['max_price']) && is_double(doubleval($filters['max_price']))) {
+    //         $query->where('room_types.price', '<=', doubleval($filters['max_price']));
+    //     }
+
+    //     // Lọc theo ngày checkin và checkout
+    //     if (!empty($filters['checkin']) && !empty($filters['checkout'])) {
+    //         $query->whereNotExists(function ($q) use ($filters) {
+    //             $q->select(DB::raw(1))
+    //                 ->from('room_reserveds')
+    //                 ->whereRaw('room_reserveds.room_id = rooms.id')
+    //                 ->where(function ($q) use ($filters) {
+    //                     $q->whereBetween('room_reserveds.start_day', [$filters['checkin'], $filters['checkout']])
+    //                         ->orWhereBetween('room_reserveds.end_day', [$filters['checkin'], $filters['checkout']])
+    //                         ->orWhere(function ($q) use ($filters) {
+    //                             $q->where('room_reserveds.start_day', '<=', $filters['checkin'])
+    //                                 ->where('room_reserveds.end_day', '>=', $filters['checkout']);
+    //                         });
+    //                 });
+    //         });
+    //     }
+
+    //     // Lấy kết quả
+    //     return $query->select(['rooms.*', 'room_types.*'])->get();
+    // }
 
     public function getHotelById(string $id)
     {
-        return $this->findBy('id', $id, ['amenities', 'roomTypes', 'reviews']);
+        return $this->findBy('id', $id, ['amenities', 'roomTypes.amenities', 'roomTypes.rooms', 'reviews']);
     }
 }

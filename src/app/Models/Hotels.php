@@ -12,7 +12,7 @@ class Hotels extends BaseModel
     protected $fillable = [
         'name',
         'description',
-        'hotel_starts',
+        'hotel_star',
         'phone_number',
         'email',
         'check_in_time',
@@ -24,7 +24,7 @@ class Hotels extends BaseModel
         'status'
     ];
     protected $casts = [
-        'hotel_starts' => HotelStarsEnum::class,
+        'hotel_star' => HotelStarsEnum::class,
         'status' => HotelStatusEnum::class,
     ];
 

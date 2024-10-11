@@ -32,7 +32,7 @@ class RoomTypes extends BaseModel
 
     public function amenities(): BelongsToMany
     {
-        return $this->belongsToMany(Amenity::class);
+        return $this->belongsToMany(Amenity::class, 'room_amenities', 'room_id', 'amenity_id');
     }
 
     public function bedTypes(): BelongsToMany

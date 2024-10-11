@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Repositories\Hotel\IHotelRepo;
 use App\Helpers\CheckUUIDFormat;
+use App\Repositories\RoomType\IRoomTypeRepository;
 use App\Services\Images\ImageServiceInterface;
 
 class HotelService implements IHotelService
@@ -20,6 +21,7 @@ class HotelService implements IHotelService
     public function __construct(
         private readonly IHotelRepo $hotelRepo,
         private readonly ImageServiceInterface $imageService,
+        private readonly IRoomTypeRepository $roomTypeRepo,
     ) {}
 
     public function getHotelsList(HotelSearchRequest $request)
@@ -32,10 +34,24 @@ class HotelService implements IHotelService
                 $hotelMatched =  $this->hotelRepo->getHotelsList($query);
                 foreach ($hotelMatched as $hotel) {
                     //get images
-                    if ($hotel['hotel']->id) {
-                        $images = $this->imageService->getHotelImages($hotel['hotel']->id);
-                        $hotel['hotel']->images = $images;
+                    if ($hotel->id) {
+                        $images = $this->imageService->getObjectImages($hotel->id);
+                        $hotel->images = $images;
+                        $hotel->average_rating = round($hotel->reviews->avg('rating'), 1);
+                        $hotel->address = $hotel->street . ',' .  $hotel->ward . ',' .  $hotel->district . ',' . $hotel->province;
+                        // $hotel->min_price = $hotel->roomTypes->min('price'); //get the min price of the roomTypes valid
+
                     }
+                    foreach ($hotel->roomTypes as $roomType) {
+                        // Kiểm tra xem giá có nằm trong khoảng min_price và max_price hay không
+                        if ($roomType->price >= $query['min_price'] && $roomType->price <= $query['max_price']) {
+                            // Nếu là lần lặp đầu tiên hoặc giá nhỏ nhất hiện tại lớn hơn giá của roomType này
+                            if (!isset($minPriceRoomType) || $roomType->price < $minPriceRoomType->price) {
+                                $minPriceRoomType = $roomType; // Gán roomType này là roomType có giá nhỏ nhất
+                            }
+                        }
+                    }
+                    $hotel->min_price = $minPriceRoomType->price;
                 }
                 return $hotelMatched;
             }
@@ -48,7 +64,21 @@ class HotelService implements IHotelService
     public function getHotelById(string $id)
     {
         try {
-            return $this->hotelRepo->getHotelById($id);
+            $hotel = $this->hotelRepo->getHotelById($id);
+            if ($hotel->id) {
+                $images = $this->imageService->getObjectImages($hotel->id);
+                $hotel->images = $images;
+                $hotel->average_rating = round($hotel->reviews->avg('rating'), 1);
+                $hotel->address = $hotel->street . ',' .  $hotel->ward . ',' .  $hotel->district . ',' . $hotel->province;
+                $hotel->min_price = $hotel->roomTypes->min('price');
+                if ($hotel->roomTypes) {
+                    foreach ($hotel->roomTypes as $roomType) {
+                        //get free room
+                        $roomType->images = $this->imageService->getObjectImages($roomType->id);
+                    }
+                }
+            }
+            return $hotel;
         } catch (\Throwable $th) {
             throw $th;
         }

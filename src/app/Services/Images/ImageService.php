@@ -15,10 +15,10 @@ class ImageService implements ImageServiceInterface
         private readonly ImageRepositoryInterface $imageRepo,
     ) {}
 
-    public function getHotelImages(string $hotelId)
+    public function getObjectImages(string $id)
     {
         $result = $this->imageRepo->getBy([
-            'object_id' => $hotelId
+            'object_id' => $id
         ]);
         foreach ($result as $image) {
             $image->path = $this->getURL($image->path);

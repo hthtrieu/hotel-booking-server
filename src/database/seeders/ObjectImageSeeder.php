@@ -47,6 +47,26 @@ class ObjectImageSeeder extends Seeder
                     ],
                 ]);
             }
+            foreach ($hotel->roomTypes as $roomType) {
+                foreach ($images as $image) {
+                    // Tạo đường dẫn tuyệt đối đến tệp
+                    $filePath = storage_path('app/public/seeder/images/' . $image);
+
+                    // Tạo đối tượng UploadedFile từ đường dẫn tệp
+                    $file = new UploadedFile($filePath, $image, null, null, true);
+
+                    // Upload file
+                    $path = $this->uploadFile($file, 'images');  // Lưu tệp vào thư mục 'images'
+                    // Thêm bản ghi vào bảng ObjectImages
+                    ObjectImages::insert([
+                        [
+                            'id' => Str::uuid(),
+                            'object_id' => $roomType->id,
+                            'path' => $path,
+                        ],
+                    ]);
+                }
+            }
         }
     }
 }
