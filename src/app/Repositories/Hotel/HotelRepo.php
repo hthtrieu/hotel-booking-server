@@ -24,7 +24,7 @@ class HotelRepo extends BaseRepository implements IHotelRepo
 
         // Lọc theo số sao của khách sạn
         if (!empty($filters['hotel_star']) && is_int(intval($filters['hotel_star']))) {
-            $query->where('hotel_star', '>=',intval($filters['hotel_star']));
+            $query->where('hotel_star', '>=', intval($filters['hotel_star']));
         }
 
         // Lọc theo đánh giá trung bình
@@ -143,6 +143,6 @@ class HotelRepo extends BaseRepository implements IHotelRepo
 
     public function getHotelById(string $id)
     {
-        return $this->findBy('id', $id, ['amenities', 'roomTypes.amenities', 'roomTypes.rooms', 'reviews']);
+        return $this->findBy('id', $id, ['amenities', 'roomTypes.amenities', 'roomTypes.rooms', 'reviews', 'roomTypes.bedTypes']);
     }
 }

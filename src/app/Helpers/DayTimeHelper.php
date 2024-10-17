@@ -7,12 +7,30 @@ use Carbon\Carbon;
 class DayTimeHelper
 {
 
-    public static function convertStringToDate(string $stringDate) {}
-
-    public static function convertStringToLocalDateTime(string $datetimeString)
+    public static function convertDateToString($date, string $format = 'Y-m-d',)
     {
-        return Carbon::createFromFormat('YmdHis', $datetimeString);
+        try {
+            $carbonDate = $date instanceof Carbon ? $date : Carbon::parse($date);
+            return $carbonDate->format($format);
+        } catch (\Exception $e) {
+            // Ghi log hoặc xử lý ngoại lệ tùy thuộc vào nhu cầu của bạn
+            return null;
+        }
     }
+
+
+    //"2024-10-16 00:55:50" -> 20241016005550
+    public static function convertStringToDateTime(string $datetimeString, string $format = 'YmdHis')
+    {
+        try {
+            return Carbon::createFromFormat($format, $datetimeString);
+        } catch (\Exception $e) {
+            // Ghi log hoặc xử lý ngoại lệ tùy thuộc vào nhu cầu của bạn
+            return null;
+        }
+    }
+
+
 
     public static function getLocalDateTimeFormat(string $format = 'YmdHis')
     {

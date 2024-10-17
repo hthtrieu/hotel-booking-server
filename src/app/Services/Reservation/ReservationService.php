@@ -14,14 +14,14 @@ use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Repositories\Hotel\IHotelRepo;
 use App\Helpers\CheckUUIDFormat;
+use App\Helpers\DayTimeHelper;
 use App\Http\Requests\Reservation\CreateReservationRequest;
 use App\Models\Reservation;
 use App\Repositories\Reservation\IReservationRepository;
 use App\Repositories\Room\IRoomRepository;
 use App\Repositories\RoomType\IRoomTypeRepository;
 use App\Repositories\User\UserRepositoryInterface;
-use PDO;
-use tidy;
+use App\Services\Hotel\IHotelService;
 
 class ReservationService implements IReservationService
 {
@@ -33,6 +33,7 @@ class ReservationService implements IReservationService
         private readonly UserRepositoryInterface $userRepo,
         private readonly IRoomTypeRepository $roomTypeRepo,
         private readonly IRoomRepository $roomRepo,
+        private readonly IHotelService $hotelService,
     ) {}
 
     public function createNewReservation(CreateReservationRequest $request)
@@ -92,24 +93,50 @@ class ReservationService implements IReservationService
         }
     }
 
-    public function getReservationByCode(string $code)
+    public function getInvoiceByReservationId(string $id)
     {
-        $reservation = $this->reservationRepo->findBy('reservation_code', $code, ['rooms']);
-        return $reservation;
-    }
+        $reservation = $this->reservationRepo->findBy(
+            'id',
+            $id,
+            ['rooms', 'user', 'invoice', 'rooms.roomTypes', 'rooms.reservations']
+        );
+        $hotel = $this->hotelService->getHotelById($reservation->rooms[0]->roomTypes->hotel->id);;
+        unset($hotel['room_types']); // Loại bỏ thuộc tính 'hotel'
+        $roomTypes = [];
 
-    public function getReservationDetails(string $reservationId = '', Reservation $reservation = null)
-    {
-        if ($reservationId) {
-            $reservationFounded = $this->reservationRepo->find($reservationId, relations: ['rooms']);
-        } else if ($reservation) {
-            $reservationFounded = $this->reservationRepo->find($reservation->id, relations: ['rooms']);
+        foreach ($reservation->rooms as $room) {
+            $roomTypeId = $room->roomTypes->id;
+            $startDate = Carbon::parse($room->pivot->start_day);
+            $endDate = Carbon::parse($room->pivot->end_day);
+            $daysCount = $startDate->diffInDays($endDate) + 1;
+
+            // Chuyển đổi roomTypes thành mảng
+            $roomTypeArray = $room->roomTypes->toArray();
+            unset($roomTypeArray['hotel']); // Loại bỏ thuộc tính 'hotel'
+            $roomTypeArray['days_count'] = $daysCount;
+            $roomTypeArray['total_rooms'] = isset($roomTypes[$roomTypeId]) ? $roomTypes[$roomTypeId]['total_rooms'] + 1 : 1;
+            $roomTypeArray['hotel'] = null;
+            $roomTypes[$roomTypeId] = $roomTypeArray;
         }
-        dd($reservationFounded['rooms']->count());
 
-        //get hotel
-        //get roomtypes list
-        //get reservation
-        //get user
+        $reservationData = [
+            'id' => $reservation->id,
+            'reservation_code' => $reservation->reservation_code,
+            'site_fees' => $reservation->site_fees,
+            'tax_paid' => $reservation->tax_paid,
+            'total_price' => $reservation->total_price,
+            'status' => $reservation->status->value,
+            'checkin' => DayTimeHelper::convertDateToString(DayTimeHelper::convertStringToDateTime($reservation->rooms[0]->pivot->start_day)),
+            'checkout' => DayTimeHelper::convertDateToString(DayTimeHelper::convertStringToDateTime($reservation->rooms[0]->pivot->end_day)),
+        ];
+        $invoiceData = [
+            'hotel' => $hotel,
+            'user' => $reservation->user,
+            'room_types' => array_values($roomTypes),
+            'invoice' => $reservation->invoice,
+            'reservation' => $reservationData,
+        ];
+
+        return $invoiceData;
     }
 }

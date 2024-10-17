@@ -119,6 +119,14 @@ class PaymentController extends Controller
      */
     public function paymentSuccess(Request $request)
     {
-        return $this->paymentService->paymentSuccess($request);
+        $invoice = $this->paymentService->paymentSuccess($request);
+        if ($invoice) {
+            return $this->respond($invoice, "Invoice");
+        }
+        return $this->respondWithErrorMessage("Error");
+    }
+    public function refund(Request $request)
+    {
+        return $this->paymentService->refund($request);
     }
 }

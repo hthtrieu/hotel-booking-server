@@ -42,16 +42,21 @@ class HotelService implements IHotelService
                         // $hotel->min_price = $hotel->roomTypes->min('price'); //get the min price of the roomTypes valid
 
                     }
-                    foreach ($hotel->roomTypes as $roomType) {
-                        // Kiểm tra xem giá có nằm trong khoảng min_price và max_price hay không
-                        if ($roomType->price >= $query['min_price'] && $roomType->price <= $query['max_price']) {
-                            // Nếu là lần lặp đầu tiên hoặc giá nhỏ nhất hiện tại lớn hơn giá của roomType này
-                            if (!isset($minPriceRoomType) || $roomType->price < $minPriceRoomType->price) {
-                                $minPriceRoomType = $roomType; // Gán roomType này là roomType có giá nhỏ nhất
+                    if (!empty($query['min_price']) && !empty($query['max_price'])) {
+                        foreach ($hotel->roomTypes as $roomType) {
+                            // Kiểm tra xem giá có nằm trong khoảng min_price và max_price hay không
+
+                            if (($roomType->price >= $query['min_price']) && $roomType->price <= $query['max_price']) {
+                                // Nếu là lần lặp đầu tiên hoặc giá nhỏ nhất hiện tại lớn hơn giá của roomType này
+                                if (!isset($minPriceRoomType) || $roomType->price < $minPriceRoomType->price) {
+                                    $minPriceRoomType = $roomType; // Gán roomType này là roomType có giá nhỏ nhất
+                                }
                             }
                         }
+                        $hotel->min_price = $minPriceRoomType->price;
+                    } else {
+                        $hotel->min_price  = $hotel->roomTypes->min('price');
                     }
-                    $hotel->min_price = $minPriceRoomType->price;
                 }
                 return $hotelMatched;
             }

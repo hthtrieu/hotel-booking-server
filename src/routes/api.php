@@ -16,6 +16,7 @@ Route::group([], function () {
     // Prefix for payments routes
     Route::group(['prefix' => 'payments'], function () {
         Route::post('/success', [PaymentController::class, 'paymentSuccess']);
+        Route::post('/refund', [PaymentController::class, 'refund']);
     });
     // Separate resource route for payments (not inside the group with prefix)
     Route::resource('payments', PaymentController::class);
@@ -25,6 +26,8 @@ Route::group([], function () {
         Route::post('/test-get-url', [UploadController::class, 'getImageURL']);
         Route::post('/test-upload', [UploadController::class, 'store']);
     });
+
+    Route::resource('reservations', ReservationController::class);
 });
 
 // Route::group(['middleware' => ['jwt.auth', 'jwt.auth:' . RoleEnum::ADMINISTRATOR->value]], function () {

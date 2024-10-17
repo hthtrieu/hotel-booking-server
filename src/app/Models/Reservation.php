@@ -38,4 +38,5 @@ class Reservation extends BaseModel
     {
         return $this->hasOne(Invoice::class, 'reservation_id');
     }
+
 }

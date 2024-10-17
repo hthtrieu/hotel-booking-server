@@ -14,7 +14,12 @@ class VnPayHelper
         $orderId = $timeRequest + random_int(1, 100);
         return $orderId;
     }
-
+    public static function generateRefundId(): string
+    {
+        $timeRequest = Carbon::now()->setTimezone('Asia/Ho_Chi_Minh')->format('YmdHis');
+        $orderId = $timeRequest + random_int(1, 100);
+        return $orderId;
+    }
     public static function getIpRequest(Request $request)
     {
         return $request->ip();

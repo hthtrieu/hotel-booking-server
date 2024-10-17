@@ -9,4 +9,6 @@ interface IPaymentService
     public function createPaymentRequest(CreateReservationRequest $request);
 
     public function paymentSuccess($request);
+
+    public function refund($request);
 }

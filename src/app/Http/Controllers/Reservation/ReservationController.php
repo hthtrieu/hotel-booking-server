@@ -3,10 +3,16 @@
 namespace App\Http\Controllers\Reservation;
 
 use App\Http\Controllers\Controller;
+use App\Services\Reservation\IReservationService;
+use App\Traits\ResponseApi;
 use Illuminate\Http\Request;
 
 class ReservationController extends Controller
 {
+    use ResponseApi;
+    public function __construct(
+        private readonly IReservationService $reservationService,
+    ) {}
     /**
      * Display a listing of the resource.
      */
@@ -36,7 +42,7 @@ class ReservationController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return $this->respond($this->reservationService->getInvoiceByReservationId($id));
     }
 
     /**
