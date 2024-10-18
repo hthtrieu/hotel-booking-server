@@ -18,19 +18,17 @@ class DayTimeHelper
         }
     }
 
-
     //"2024-10-16 00:55:50" -> 20241016005550
     public static function convertStringToDateTime(string $datetimeString, string $format = 'YmdHis')
     {
         try {
-            return Carbon::createFromFormat($format, $datetimeString);
+            $dateTime = Carbon::createFromFormat('Y-m-d H:i:s', $datetimeString);
+            return $dateTime->format($format);
         } catch (\Exception $e) {
             // Ghi log hoặc xử lý ngoại lệ tùy thuộc vào nhu cầu của bạn
             return null;
         }
     }
-
-
 
     public static function getLocalDateTimeFormat(string $format = 'YmdHis')
     {

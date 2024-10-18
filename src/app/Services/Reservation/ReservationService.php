@@ -118,7 +118,7 @@ class ReservationService implements IReservationService
             $roomTypeArray['hotel'] = null;
             $roomTypes[$roomTypeId] = $roomTypeArray;
         }
-
+        // dd(DayTimeHelper::convertStringToDateTime($reservation->rooms[0]->pivot->start_day));
         $reservationData = [
             'id' => $reservation->id,
             'reservation_code' => $reservation->reservation_code,
@@ -139,4 +139,12 @@ class ReservationService implements IReservationService
 
         return $invoiceData;
     }
+    public function getReservationByCode(string $code){
+        $reservation = $this->reservationRepo->findBy('reservation_code', $code);
+        if($reservation){
+            return $this->getInvoiceByReservationId($reservation);
+        }
+        return null;
+    }
+
 }

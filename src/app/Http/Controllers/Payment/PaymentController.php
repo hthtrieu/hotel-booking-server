@@ -127,6 +127,10 @@ class PaymentController extends Controller
     }
     public function refund(Request $request)
     {
-        return $this->paymentService->refund($request);
+        $invoice = $this->paymentService->refund($request);
+        if ($invoice) {
+            return $this->respond($invoice, "Invoice");
+        }
+        return $this->respondWithErrorMessage("Error");
     }
 }

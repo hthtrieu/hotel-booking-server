@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('reservation_code')->nullable();
             $table->double('site_fees')->nullable();
             $table->double('tax_paid');
-            $table->enum('status', ['CANCELLED', 'CONFIRMED', 'PENDING']);
+            $table->enum('status', ['CANCELLED', 'CONFIRMED', 'PENDING', 'REFUND']);
             $table->double('total_price');
             $table->dateTime('expire_time')->nullable();
                 // ->default(Carbon::now()->setTimezone('Asia/Ho_Chi_Minh')->addMinutes(10)->format('YmdHis')); //time for payment = 10 min

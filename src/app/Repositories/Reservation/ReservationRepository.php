@@ -29,7 +29,6 @@ class ReservationRepository extends BaseRepository implements IReservationReposi
 
         $rooms = $data['rooms'];
         foreach ($rooms as $room) {
-
             $newReservation->rooms()->attach($room['id'], [
                 'start_day' => $data['start_day'],
                 'end_day' => $data['end_day'],

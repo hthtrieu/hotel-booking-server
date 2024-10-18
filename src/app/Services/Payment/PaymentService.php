@@ -13,6 +13,7 @@ use App\Services\Reservation\IReservationService;
 use App\Http\Requests\Reservation\CreateReservationRequest;
 use App\Repositories\Invoice\IInvoiceRepository;
 use App\Repositories\User\UserRepositoryInterface;
+use App\Services\Invoice\InvoiceServiceInterface;
 use GuzzleHttp\Client;
 
 class PaymentService implements IPaymentService
@@ -24,6 +25,7 @@ class PaymentService implements IPaymentService
         private readonly IReservationService $reservationService,
         private readonly IInvoiceRepository $invoiceRepo,
         private readonly UserRepositoryInterface $userRepo,
+        private readonly InvoiceServiceInterface $invoiceService,
     ) {}
 
     public function createPaymentRequest(CreateReservationRequest $request)
@@ -46,29 +48,6 @@ class PaymentService implements IPaymentService
         $vnp_CreateDate = Carbon::now()->setTimezone('Asia/Ho_Chi_Minh')->format('YmdHis');
         $vnp_ExpireDate = Carbon::now()->setTimezone('Asia/Ho_Chi_Minh')->addMinutes(10)->format('YmdHis');
 
-        // //Billing
-        // $vnp_Bill_Mobile = $_POST['txt_billing_mobile'];
-        // $vnp_Bill_Email = $_POST['txt_billing_email'];
-        // $fullName = trim($_POST['txt_billing_fullname']);
-        // if (isset($fullName) && trim($fullName) != '') {
-        //     $name = explode(' ', $fullName);
-        //     $vnp_Bill_FirstName = array_shift($name);
-        //     $vnp_Bill_LastName = array_pop($name);
-        // }
-        // $vnp_Bill_Address = $_POST['txt_inv_addr1'];
-        // $vnp_Bill_City = $_POST['txt_bill_city'];
-        // $vnp_Bill_Country = $_POST['txt_bill_country'];
-        // $vnp_Bill_State = $_POST['txt_bill_state'];
-
-        // // Invoice
-        // $vnp_Inv_Phone = $_POST['txt_inv_mobile'];
-        // $vnp_Inv_Email = $_POST['txt_inv_email'];
-        // $vnp_Inv_Customer = $_POST['txt_inv_customer'];
-        // $vnp_Inv_Address = $_POST['txt_inv_addr1'];
-        // $vnp_Inv_Company = $_POST['txt_inv_company'];
-        // $vnp_Inv_Taxcode = $_POST['txt_inv_taxcode'];
-        // $vnp_Inv_Type = $_POST['cbo_inv_type'];
-
         $inputData = array(
             "vnp_Version" => "2.1.0",
             "vnp_TmnCode" => $vnp_TmnCode,
@@ -83,32 +62,8 @@ class PaymentService implements IPaymentService
             "vnp_ReturnUrl" => $vnp_Returnurl,
             "vnp_TxnRef" => $vnp_TxnRef,
             "vnp_ExpireDate" => $vnp_ExpireDate,
-
-            // "vnp_Bill_Mobile" => $vnp_Bill_Mobile,
-            // "vnp_Bill_Email" => $vnp_Bill_Email,
-            // "vnp_Bill_FirstName" => $vnp_Bill_FirstName,
-            // "vnp_Bill_LastName" => $vnp_Bill_LastName,
-            // "vnp_Bill_Address" => $vnp_Bill_Address,
-            // "vnp_Bill_City" => $vnp_Bill_City,
-            // "vnp_Bill_Country" => $vnp_Bill_Country,
-
-            // "vnp_Inv_Phone" => $vnp_Inv_Phone,
-            // "vnp_Inv_Email" => $vnp_Inv_Email,
-            // "vnp_Inv_Customer" => $vnp_Inv_Customer,
-            // "vnp_Inv_Address" => $vnp_Inv_Address,
-            // "vnp_Inv_Company" => $vnp_Inv_Company,
-            // "vnp_Inv_Taxcode" => $vnp_Inv_Taxcode,
-            // "vnp_Inv_Type" => $vnp_Inv_Type
         );
 
-        // if (isset($vnp_BankCode) && $vnp_BankCode != "") {
-        //     $inputData['vnp_BankCode'] = $vnp_BankCode;
-        // }
-        // if (isset($vnp_Bill_State) && $vnp_Bill_State != "") {
-        //     $inputData['vnp_Bill_State'] = $vnp_Bill_State;
-        // }
-
-        // var_dump($inputData);
         ksort($inputData);
         $query = "";
         $i = 0;
@@ -203,10 +158,22 @@ class PaymentService implements IPaymentService
             $responseData = json_decode($response->getBody(), true);
             // dd($responseData);
             if ($responseData['vnp_ResponseCode'] == '00') {
-                return $this->respondWithMessage("Refund successful");
+                $invoice = $this->invoiceRepo->findBy('order_id', $inputData['vnp_TxnRef']);
+                $this->invoiceService->updateInvoiceCancel($invoice->id,$request->price);
+                $reservation =$this->reservationRepo->update($invoice->reservation->id, [
+                    'status' => ReservationStatusEnum::CANCELLED,
+                ]);
+                return $this->reservationService->getInvoiceByReservationId($reservation->id);
+
             } else {
-                // return $this->respond(json_decode($response->getBody(), true));
-                return $this->respondWithErrorMessage('Refund failed: ' . $responseData['vnp_Message']);
+                // ! in dev mode
+                $invoice = $this->invoiceRepo->findBy('order_id', $inputData['vnp_TxnRef']);
+                $this->invoiceService->updateInvoiceCancel($invoice->id,$request->price);
+                $reservation =$this->reservationRepo->update($invoice->reservation->id, [
+                    'status' => ReservationStatusEnum::CANCELLED,
+                ]);
+                return $this->reservationService->getInvoiceByReservationId($reservation->id);
+
             }
         } catch (\Exception $e) {
             dd($e);
