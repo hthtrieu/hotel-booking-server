@@ -9,4 +9,6 @@ interface IInvoiceRepository extends BaseRepositoryInterface
 {
 
     public function insertInvoice($data);
+
+    public function findByWithLock($column, $value);
 }

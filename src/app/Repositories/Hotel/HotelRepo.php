@@ -95,52 +95,6 @@ class HotelRepo extends BaseRepository implements IHotelRepo
         return $hotels->appends($filters);
     }
 
-    // // Hàm lấy phòng cho khách sạn với bộ lọc được giữ nguyên
-    // private function getRoomsForHotel($hotel, array $filters)
-    // {
-    //     $query = DB::table('rooms')
-    //         ->join('room_types', 'rooms.room_types_id', '=', 'room_types.id')
-    //         ->where('room_types.hotel_id', $hotel->id);
-
-    //     // Lọc theo số người lớn và trẻ em
-    //     if (!empty($filters['adult'])) {
-    //         $query->where('room_types.adult_count', '>=', $filters['adult']);
-    //     }
-
-    //     if (!empty($filters['children'])) {
-    //         $query->where('room_types.children_count', '>=', $filters['children']);
-    //     }
-
-    //     // Lọc theo giá (min_price và max_price)
-    //     if (!empty($filters['min_price']) && is_double(doubleval($filters['min_price']))) {
-    //         $query->where('room_types.price', '>=', doubleval($filters['min_price']));
-    //     }
-
-    //     if (!empty($filters['max_price']) && is_double(doubleval($filters['max_price']))) {
-    //         $query->where('room_types.price', '<=', doubleval($filters['max_price']));
-    //     }
-
-    //     // Lọc theo ngày checkin và checkout
-    //     if (!empty($filters['checkin']) && !empty($filters['checkout'])) {
-    //         $query->whereNotExists(function ($q) use ($filters) {
-    //             $q->select(DB::raw(1))
-    //                 ->from('room_reserveds')
-    //                 ->whereRaw('room_reserveds.room_id = rooms.id')
-    //                 ->where(function ($q) use ($filters) {
-    //                     $q->whereBetween('room_reserveds.start_day', [$filters['checkin'], $filters['checkout']])
-    //                         ->orWhereBetween('room_reserveds.end_day', [$filters['checkin'], $filters['checkout']])
-    //                         ->orWhere(function ($q) use ($filters) {
-    //                             $q->where('room_reserveds.start_day', '<=', $filters['checkin'])
-    //                                 ->where('room_reserveds.end_day', '>=', $filters['checkout']);
-    //                         });
-    //                 });
-    //         });
-    //     }
-
-    //     // Lấy kết quả
-    //     return $query->select(['rooms.*', 'room_types.*'])->get();
-    // }
-
     public function getHotelById(string $id)
     {
         return $this->findBy('id', $id, ['amenities', 'roomTypes.amenities', 'roomTypes.rooms', 'reviews', 'roomTypes.bedTypes']);

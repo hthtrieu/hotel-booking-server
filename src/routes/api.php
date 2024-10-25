@@ -6,6 +6,7 @@ use App\Http\Controllers\Hotel\HotelController;
 use App\Http\Controllers\Reservation\ReservationController;
 use App\Http\Controllers\Payment\PaymentController;
 use App\Http\Controllers\Upload\UploadController;
+use App\Http\Controllers\User\UserController;
 
 require __DIR__ . '/auth.php';
 
@@ -28,20 +29,20 @@ Route::group([], function () {
     });
 
     Route::resource('reservations', ReservationController::class);
+
+    //! for coding front-end
+    Route::group(['prefix' => 'user'], function () {
+        Route::get('/reservations', [UserController::class, 'getUserReservationByStatus']);
+        Route::get('/profile', [UserController::class, 'profile']);
+        Route::put('/profile/update/{id}', [UserController::class, 'updateProfile']);
+    });
+
+    Route::get('/test-mail', [ReservationController::class, 'sendMail']);
 });
 
-// Route::group(['middleware' => ['jwt.auth', 'jwt.auth:' . RoleEnum::ADMINISTRATOR->value]], function () {
-//     Route::group(['prefix' => 'user'], function () {
-//         Route::group(['prefix' => 'admin'], function () {
-//             // Route::get('', [UserController::class, 'index']);
-//         });
-//     });
-// });
-
-// Route::group(['middleware' => ['jwt.auth']], function () {
-//     Route::group(['prefix' => 'user'], function () {
-//         // Route::get('/{id}', [UserController::class, 'show_by_user']);
-//         // Route::post('/change-password', [UserController::class, 'change_password_by_user']);
-//         // Route::put('/{id}', [UserController::class, 'update_by_user']);
-//     });
-// });
+Route::group(['middleware' => ['jwt.auth', 'jwt.auth:' . RoleEnum::USER->value]], function () {
+    // Route::group(['prefix' => 'user'], function () {
+    //    Route::get('/hitory', [UserController::class, 'getUserHistoryReservation']);
+    // Route::get('/profile', [UserController::class, 'profile']);
+    // });
+});

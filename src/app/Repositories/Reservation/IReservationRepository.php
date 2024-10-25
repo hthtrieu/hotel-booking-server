@@ -9,4 +9,5 @@ interface IReservationRepository extends BaseRepositoryInterface
 {
 
     public function createNewReservation($data);
+    public function findWithLock($id);
 }

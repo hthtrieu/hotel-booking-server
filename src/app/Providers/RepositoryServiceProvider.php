@@ -57,6 +57,7 @@ use App\Services\Images\ImageService;
 use App\Services\Invoice\InvoiceServiceInterface;
 use App\Services\Invoice\InvoiceService;
 
+
 class RepositoryServiceProvider extends ServiceProvider
 {
     /**
@@ -84,6 +85,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(IUserService::class, UserService::class);
         $this->app->bind(ImageServiceInterface::class, ImageService::class);
         $this->app->bind(InvoiceServiceInterface::class, InvoiceService::class);
+
     }
 
     /**

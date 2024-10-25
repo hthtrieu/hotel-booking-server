@@ -9,6 +9,7 @@ use App\Http\Requests\Hotels\HotelSearchRequest;
 use App\Services\Hotel\IHotelService;
 use Error;
 use App\ApiCode;
+use App\Http\Resources\HotelResource;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Traits\ResponseApi;
 use Carbon\Carbon;
@@ -192,7 +193,7 @@ class HotelController extends Controller
     {
         $hotel =  $this->hotelService->getHotelById($id);
         if ($hotel) {
-            return $this->respond($hotel, 'get hotel success');
+            return $this->respond(new HotelResource($hotel), 'get hotel success');
         } else {
             return $this->respondWithError(apiCode::DATA_NOT_FOUND, 404);
         }

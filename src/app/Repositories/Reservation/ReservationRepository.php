@@ -12,6 +12,10 @@ class ReservationRepository extends BaseRepository implements IReservationReposi
 {
     protected $modelName = Reservation::class;
 
+    public function findWithLock($id)
+    {
+        return Reservation::where('id', $id)->lockForUpdate()->first();
+    }
     public function createNewReservation($data)
     {
         $newReservation = new Reservation();

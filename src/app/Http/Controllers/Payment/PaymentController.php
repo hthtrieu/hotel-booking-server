@@ -7,7 +7,11 @@ use Illuminate\Http\Request;
 use App\Traits\ResponseApi;
 use App\Services\Payment\IPaymentService;
 use App\ApiCode;
+use App\Dtos\Payment\CreateRefundRequestDTO;
+use App\Dtos\Reservation\CreateReservationRequestDTO;
+use App\Http\Requests\Payment\RefundRequest;
 use App\Http\Requests\Reservation\CreateReservationRequest;
+use App\Http\Resources\ReservationDetailsResponse;
 
 class PaymentController extends Controller
 {
@@ -56,12 +60,24 @@ class PaymentController extends Controller
      */
     public function store(CreateReservationRequest $request)
     {
-        return $this->paymentService->createPaymentRequest($request);
-        // if ($urlDataArray) {
-        //     return $this->respond($urlDataArray, "Payment Request");
-        // } else {
-        //     return $this->respondWithError(ApiCode::DATA_NOT_FOUND, 404);
-        // }
+        $request->validated();
+
+        $createReservationDTO = new CreateReservationRequestDTO(
+            $request->input('hotel_id'),
+            $request->input('note') || "",
+            $request->input('name'),
+            $request->input('email'),
+            $request->input('phoneNumber'),
+            $request->input('paymentMethod') || "CREDIT CARD",
+            $request->input('roomTypeReservedList'),
+            $request->input('totalPrice'),
+            $request->input('tax'),
+            $request->input('vat'),
+            $request->input('checkInDay'),
+            $request->input('checkOutDay')
+        );
+        $data = $this->paymentService->createPaymentRequest($createReservationDTO, $request);
+        return $this->respond($data, "Reservation is pending");
     }
 
     /**
@@ -120,16 +136,32 @@ class PaymentController extends Controller
     public function paymentSuccess(Request $request)
     {
         $invoice = $this->paymentService->paymentSuccess($request);
+
         if ($invoice) {
-            return $this->respond($invoice, "Invoice");
+            return $this->respond(
+                new ReservationDetailsResponse($invoice),
+                "invoice info"
+            );
         }
         return $this->respondWithErrorMessage("Error");
     }
-    public function refund(Request $request)
+    public function refund(RefundRequest $request)
     {
-        $invoice = $this->paymentService->refund($request);
+        // $request->validate();
+        $refundRequest = new CreateRefundRequestDTO(
+            $request->input('order_id'),
+            $request->input('price'),
+            $request->input('transaction_type'),
+            $request->input('user')
+            // $request->input('transaction_date'),
+        );
+        // dd($refundRequest);
+        $invoice = $this->paymentService->refund($refundRequest);
         if ($invoice) {
-            return $this->respond($invoice, "Invoice");
+            return $this->respond(
+                new ReservationDetailsResponse($invoice),
+                "Invoice Refund"
+            );
         }
         return $this->respondWithErrorMessage("Error");
     }

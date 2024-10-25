@@ -2,7 +2,12 @@
 
 namespace App\Services\Payment;
 
+use App\Dtos\Reservation\CreateReservationRequestDTO;
+use App\Dtos\Payment\CreatePaymentUrlDTO;
+use App\Dtos\Payment\CreateRefundRequestDTO;
 use App\Enums\ReservationStatusEnum;
+use App\Exceptions\DataNotFoundException;
+use App\Exceptions\ResponseException;
 use App\Helpers\DayTimeHelper;
 use App\Helpers\ReservationHelper;
 use App\Helpers\VnPayHelper;
@@ -11,10 +16,13 @@ use Carbon\Carbon;
 use App\Repositories\Reservation\IReservationRepository;
 use App\Services\Reservation\IReservationService;
 use App\Http\Requests\Reservation\CreateReservationRequest;
+use App\Mail\ReservationConfirmMail;
 use App\Repositories\Invoice\IInvoiceRepository;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\Invoice\InvoiceServiceInterface;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class PaymentService implements IPaymentService
 {
@@ -28,7 +36,24 @@ class PaymentService implements IPaymentService
         private readonly InvoiceServiceInterface $invoiceService,
     ) {}
 
-    public function createPaymentRequest(CreateReservationRequest $request)
+    public function createPaymentRequest(CreateReservationRequestDTO $data, $request)
+    {
+        $validAmount = $this->reservationService->checkValidReservationAmount($data);
+        if (!$validAmount) {
+            throw new ResponseException("Vat not correct");
+        }
+        $urlData = $this->createVnpayURL(new CreatePaymentUrlDTO($data->vat, VnPayHelper::getIpRequest($request)));
+        // //save reservation status is pending
+        $reservation = $this->reservationService->createNewReservation(($data));
+        if (isset($_POST['redirect'])) {
+            header('Location: ' . $urlData['vnp_Url']);
+            die();
+        }
+        //!warning: delete after test api
+        $urlData['reservation_id'] = $reservation->id;
+        return $urlData;
+    }
+    public function createVnpayURL(CreatePaymentUrlDTO $data)
     {
         $vnp_Url = config('vnpay.vnp_URL');
         $vnp_Returnurl = config('vnpay.vnp_Return_URL');
@@ -40,10 +65,10 @@ class PaymentService implements IPaymentService
 
         $vnp_OrderInfo = "Thanh toan don dat: {$vnp_TxnRef}";
         $vnp_OrderType = 'other';
-        $vnp_Amount = $request->totalPrice * 100; //!todo: check amount is not decimal
+        $vnp_Amount = $data->amount * 100; //!todo: check amount is not decimal
         $vnp_Locale = "vn";
         // $vnp_BankCode = $_POST['bank_code'];
-        $vnp_IpAddr = VnPayHelper::getIpRequest($request);
+        $vnp_IpAddr = $data->requestIp;
         //Add Params of 2.0.1 Version
         $vnp_CreateDate = Carbon::now()->setTimezone('Asia/Ho_Chi_Minh')->format('YmdHis');
         $vnp_ExpireDate = Carbon::now()->setTimezone('Asia/Ho_Chi_Minh')->addMinutes(10)->format('YmdHis');
@@ -84,33 +109,28 @@ class PaymentService implements IPaymentService
             $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
         }
         $returnData = array(
-            'code' => '00',
-            'vnp_url' => $vnp_Url
+            'vnp_url' => $vnp_Url,
+            'order_id' => $vnp_TxnRef,
         );
-        //save reservation status is pending
-        $reservation = $this->reservationService->createNewReservation(($request));
-        if (isset($_POST['redirect'])) {
-            header('Location: ' . $vnp_Url);
-            die();
-        }
-        //!warning: delete after test api
-        $returnData['order_id'] = $vnp_TxnRef;
-        $returnData['reservation_id'] = $reservation->id;
-        return $this->respond($returnData, "Payment Request");
+        return $returnData;
     }
-
-    public function refund($request)
+    public function refund(CreateRefundRequestDTO $request)
     {
+        $isValid = $this->invoiceService->checkValidRefundRequest($request);
+        if (!$isValid) {
+            throw new ResponseException("Invalid Request");
+        }
+        $invoiced = $this->invoiceService->getInvoiceByOrderId($request->order_id);
         $vnp_Url = config('vnpay.vnp_REFUND_URL');
         $vnp_TmnCode = config('vnpay.vnp_TmnCode');
         $vnp_HashSecret = config('vnpay.vnp_HashSecret');
         $vnp_TxnRef = $request->order_id; // Lấy từ request
         $vnp_RequestId = VnPayHelper::generateRefundId();
         $vnp_OrderInfo = "Hoan tien don: {$vnp_TxnRef}";
-        $vnp_Amount = $request->price * 100; // Số tiền hoàn tiền, kiểm tra tính hợp lệ
-        $vnp_IpAddr = VnPayHelper::getIpRequest($request); // Lấy IP server
+        $vnp_Amount = $request->amount * 100; // Số tiền hoàn tiền, kiểm tra tính hợp lệ
+        $vnp_IpAddr = '127.0.0.1'; // Lấy IP server
         $vnp_CreateDate = Carbon::now()->setTimezone('Asia/Ho_Chi_Minh')->format('YmdHis');
-        $vnp_TransactionDate = $request->transaction_date; // Lấy từ request
+        $vnp_TransactionDate = $invoiced->transaction_date; // Lấy từ request? getinvoice -> ...
 
         $inputData = [
             "vnp_RequestId" => $vnp_RequestId,
@@ -124,7 +144,7 @@ class PaymentService implements IPaymentService
             "vnp_TxnRef" => $vnp_TxnRef,
             "vnp_CreateDate" => $vnp_CreateDate,
             "vnp_TransactionDate" => $vnp_TransactionDate,
-            "vnp_CreateBy" => 'user', // Lấy từ request
+            "vnp_CreateBy" => $request->userName, // Lấy từ request
         ];
 
         // Build the hashdata
@@ -159,60 +179,69 @@ class PaymentService implements IPaymentService
             // dd($responseData);
             if ($responseData['vnp_ResponseCode'] == '00') {
                 $invoice = $this->invoiceRepo->findBy('order_id', $inputData['vnp_TxnRef']);
-                $this->invoiceService->updateInvoiceCancel($invoice->id,$request->price);
-                $reservation =$this->reservationRepo->update($invoice->reservation->id, [
+                $this->invoiceService->updateInvoiceCancel($invoice->id, $request->amount);
+                $reservation = $this->reservationRepo->update($invoice->reservation->id, [
                     'status' => ReservationStatusEnum::CANCELLED,
                 ]);
                 return $this->reservationService->getInvoiceByReservationId($reservation->id);
-
             } else {
                 // ! in dev mode
                 $invoice = $this->invoiceRepo->findBy('order_id', $inputData['vnp_TxnRef']);
-                $this->invoiceService->updateInvoiceCancel($invoice->id,$request->price);
-                $reservation =$this->reservationRepo->update($invoice->reservation->id, [
+                $this->invoiceService->updateInvoiceCancel($invoice->id, $request->amount);
+                $reservation = $this->reservationRepo->update($invoice->reservation->id, [
                     'status' => ReservationStatusEnum::CANCELLED,
                 ]);
-                return $this->reservationService->getInvoiceByReservationId($reservation->id);
 
+                return $this->reservationService->getInvoiceByReservationId($reservation->id);
             }
         } catch (\Exception $e) {
-            dd($e);
-            return $this->respondWithErrorMessage($e->getMessage());
+            throw new ResponseException($e->getMessage());
         }
     }
 
 
     public function paymentSuccess($request)
     {
-        $existedInvoice = $this->invoiceRepo->findBy("order_id", $request->order_id);
-        if ($existedInvoice) {
-            return $this->reservationService->getInvoiceByReservationId($request->reservation_id);
-        }
-        // Tìm reservation theo ID
-        $reservationUpdated = $this->reservationRepo->find($request->reservation_id);
-        $reservationUpdated->reservation_code = ReservationHelper::generateReservationCode();
-        $reservationUpdated->status = ReservationStatusEnum::CONFIRMED->value;
+        return DB::transaction(function () use ($request) {
+            // Kiểm tra xem hóa đơn đã tồn tại chưa và khóa hàng dữ liệu tương ứng
+            $existedInvoice = $this->invoiceRepo->findByWithLock('order_id', $request->order_id);
 
-        // Cập nhật reservation
-        $this->reservationRepo->update($reservationUpdated->id, $reservationUpdated->toArray());
+            if ($existedInvoice) {
+                return $this->reservationService->getInvoiceByReservationId($request->reservation_id);
+            }
 
-        // Lấy thông tin user từ reservation
-        $user = $reservationUpdated->user; // Giả sử mối quan hệ user() đã được định nghĩa
-        $user = $this->userRepo->findBy('email', $user->email);
+            // Tìm reservation theo ID và khóa hàng dữ liệu
+            $reservationUpdated = $this->reservationRepo->findWithLock($request->reservation_id);
+            if (!$reservationUpdated) {
+                throw new DataNotFoundException("Reservation not found");
+            }
+            $reservationUpdated->reservation_code = ReservationHelper::generateReservationCode();
+            $reservationUpdated->status = ReservationStatusEnum::CONFIRMED->value;
 
-        //!todo create invoice
-        $invoice = $this->invoiceRepo->insertInvoice([
-            'invoice_amount' => $reservationUpdated->total_price,
-            'time_paid' => DayTimeHelper::convertStringToDateTime($request->transaction_date),
-            'order_id' => $request->order_id,
-            'payment_method' => $request->payment_method,
-            'reservation' => $reservationUpdated, // Lưu reservation ID
-            'user' => $user, // Lưu user ID
-        ]);
-        if ($invoice) {
-            return $this->reservationService->getInvoiceByReservationId($reservationUpdated->id);
-        } else {
-            return null;
-        }
+            // Cập nhật reservation
+            $result = $this->reservationRepo->update($reservationUpdated->id, $reservationUpdated->toArray());
+
+            // Lấy thông tin user từ reservation
+            $user = $reservationUpdated->user;
+            $user = $this->userRepo->findBy('email', $user->email);
+
+            // Tạo hóa đơn
+            $invoice = $this->invoiceRepo->insertInvoice([
+                'invoice_amount' => $reservationUpdated->total_price,
+                'time_paid' => DayTimeHelper::formatStringDateTime($request->transaction_date),
+                'order_id' => $request->order_id,
+                'payment_method' => $request->payment_method,
+                'reservation' => $reservationUpdated,
+                'user' => $user,
+            ]);
+
+            if ($invoice) {
+                $data = $this->reservationService->getInvoiceByReservationId($reservationUpdated->id);
+                Mail::to($user->email)->send(new ReservationConfirmMail($data));
+                return $data;
+            } else {
+                return null;
+            }
+        });
     }
 }

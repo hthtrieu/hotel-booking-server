@@ -29,7 +29,6 @@ class AuthService implements AuthServiceInterface
         if (!$token = JWTAuth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             return $this->respondUnAuthorizedRequest(ApiCode::INVALID_CREDENTIALS);
         }
-
         return $this->respondWithToken($token);
     }
 

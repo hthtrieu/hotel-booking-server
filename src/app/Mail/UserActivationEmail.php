@@ -3,21 +3,22 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class FooterMail extends Mailable
+class UserActivationEmail extends Mailable
 {
     use Queueable, SerializesModels;
-
+    public string $otp;
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct(string $otp)
     {
-        //
+        $this->otp = $otp;
     }
 
     /**
@@ -26,7 +27,7 @@ class FooterMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Footer Mail',
+            subject: 'User Activation Email',
         );
     }
 
@@ -36,7 +37,7 @@ class FooterMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'mail.footer-mail',
+            view: 'mail.active-mail',
         );
     }
 

@@ -22,7 +22,7 @@ class CreateReservationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'hotel_id' => config('validation.id'),
+            // 'hotel_id' => config('validation.id'),
             'note' => ['string'], //optional
             'name' => config('validation.string'),
             'email' => config('validation.email'),
@@ -34,7 +34,12 @@ class CreateReservationRequest extends FormRequest
             'vat' => config('validation.numeric'), //total price after tax
             'checkInDay' => config('validation.string'), //checkin day
             'checkOutDay' => config('validation.string'), // checkout day
-            'roomTypeReservedList' => ['array'],
+            'roomTypeReservedList' => 'required|array',
+            'roomTypeReservedList.*.id' => 'required|string',
+            'roomTypeReservedList.*.count' => 'required|integer|min:1',
+            'roomTypeReservedList.*.price' => 'required|numeric',
+            // 'checkInDay' => 'required|date',
+            // 'checkOutDay' => 'required|date|after:checkInDay',
         ];
     }
 }

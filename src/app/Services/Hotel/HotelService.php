@@ -3,6 +3,7 @@
 namespace App\Services\Hotel;
 
 use App\ApiCode;
+use App\Dtos\Hotel\HotelDTO;
 use App\Http\Requests\Hotels\HotelSearchRequest;
 use App\Traits\ResponseApi;
 use Carbon\Carbon;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Repositories\Hotel\IHotelRepo;
 use App\Helpers\CheckUUIDFormat;
+use App\Http\Resources\HotelResource;
 use App\Repositories\RoomType\IRoomTypeRepository;
 use App\Services\Images\ImageServiceInterface;
 
@@ -66,7 +68,7 @@ class HotelService implements IHotelService
         }
     }
 
-    public function getHotelById(string $id)
+    public function getHotelById(string $id): HotelDTO
     {
         try {
             $hotel = $this->hotelRepo->getHotelById($id);
@@ -83,7 +85,8 @@ class HotelService implements IHotelService
                     }
                 }
             }
-            return $hotel;
+            $hotelDTO = HotelDTO::fromModel($hotel);
+            return $hotelDTO;
         } catch (\Throwable $th) {
             throw $th;
         }

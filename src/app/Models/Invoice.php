@@ -16,6 +16,7 @@ class Invoice extends BaseModel
         'time_canceled',
         'time_created',
         'time_paid',
+        'created_by',
     ];
 
     public function user(): BelongsTo

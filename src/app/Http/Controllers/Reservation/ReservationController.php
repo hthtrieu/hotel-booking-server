@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Reservation;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ReservationDetailsResponse;
 use App\Services\Reservation\IReservationService;
 use App\Traits\ResponseApi;
 use Illuminate\Http\Request;
@@ -42,7 +43,11 @@ class ReservationController extends Controller
      */
     public function show(string $id)
     {
-        return $this->respond($this->reservationService->getInvoiceByReservationId($id));
+        $reservationResponseDTO = $this->reservationService->getInvoiceByReservationId($id);
+        return $this->respond(
+            new ReservationDetailsResponse($reservationResponseDTO),
+            "reservation info"
+        );
     }
 
     /**
@@ -67,5 +72,14 @@ class ReservationController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function sendMail()
+    {
+        $result = $this->reservationService->TestSendMail();
+        if ($result) {
+            return  $this->respond($result, 'Mail');
+        }
+        return $this->respondWithErrorMessage("Error");
     }
 }
